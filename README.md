@@ -1,19 +1,23 @@
-![Sablier V2 Sandbox](/packages/assets/banner.png)
+![Sablier Sandbox](/packages/assets/banner.png)
 
-# Sablier V2 Sandbox
+# Sablier Sandbox
 
-Front-end sandbox development environments for Sablier V2.
+Front-end sandbox development environments for Sablier.
 
 ## Background
 
 Sablier is a smart contract protocol that enables trustless streaming of ERC-20 assets, which means the ability to make
 payments by the second.
 
-There are two types of streaming models in Sablier:
+### Lockup
+
+There are three types of lockup streaming in Sablier:
 
 - **LockupLinear**, abbreviated as **LL**, which creates streams with linear streaming functions
 - **LockupDynamic**, abbreviated as **LD**, which creates streams with dynamic streaming functions (examples:
-  exponentials, logarithms, step functions)
+  exponentials, logarithms)
+- **LockupTranched**, abbreviated as **LT**, which creates streams with stepper/tranched streaming functions (examples:
+  monthly, timelocks, step functions)
 
 For more information, please refer to our [documentation](https://docs.sablier.com).
 
@@ -21,13 +25,17 @@ It is worth noting that you can charge a service fee when creating a stream. Thi
 total value and is paid to your designated broker address. Check out the "broker" references in the code to see how this
 works, as well as this [guide](https://docs.sablier.com/concepts/protocol/fees) from our docs.
 
+### Flow
+
+Flow streams work within an open-ended model (no upfront deposits, top-ups, rate adjustments, no end date). This sandbox doesn't yet have examples of Flow integrations but we invite you to check our docs for more details.
+
 ## Environments and Examples
 
-![Sablier V2 Sandbox](/packages/assets/banner-s1.png)
+![Sablier Sandbox](/packages/assets/banner-s1.png)
 
 ### Ethers V6
 
-An integration of the [Sablier V2 Core](https://github.com/sablier-labs/v2-core) contracts into a frontend environment
+An integration of the [Sablier Core](https://github.com/sablier-labs/v2-core) contracts into a frontend environment
 that uses [Ethers V6](https://docs.ethers.org/v6/). It's a small app that runs on the Sepolia testnet and provides an
 injected wallet connection out of the box.
 
