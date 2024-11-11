@@ -1,18 +1,10 @@
-import styled from "styled-components";
-import {
-  Amount,
-  Cancelability,
-  Cliff,
-  Duration,
-  Recipient,
-  Token,
-  Transferability,
-} from "./fields";
 import { useCallback } from "react";
-import { Core, ERC20 } from "../../../models";
-import useStoreForm, { prefill } from "./store";
+import styled from "styled-components";
 import _ from "lodash";
 import { useAccount } from "wagmi";
+import { Core, ERC20 } from "../../../models";
+import { Amount, Cancelability, Cliff, Duration, Recipient, Token, Transferability } from "./fields";
+import useStoreForm, { prefill } from "./store";
 
 const Wrapper = styled.div`
   display: flex;
@@ -86,7 +78,7 @@ function LockupLinear() {
       const state = useStoreForm.getState();
       try {
         state.api.update({ error: undefined });
-        await ERC20.doApprove("SablierV2LockupLinear", state, state.api.log);
+        await ERC20.doApprove("SablierLockupLinear", state, state.api.log);
       } catch (error) {
         state.api.update({ error: _.toString(error) });
       }

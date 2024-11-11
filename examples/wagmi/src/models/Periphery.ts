@@ -27,8 +27,8 @@ export default class Periphery {
     console.info("Payload", data);
 
     const tx = await writeContract({
-      address: contracts[SEPOLIA_CHAIN_ID].SablierV2Batch,
-      abi: ABI.SablierV2Batch.abi,
+      address: contracts[SEPOLIA_CHAIN_ID].SablierBatchLockup,
+      abi: ABI.SablierBatchLockup.abi,
       functionName: "createWithDurations",
       args: data,
     });
@@ -51,8 +51,8 @@ export default class Periphery {
     console.info("Payload", data);
 
     const tx = await writeContract({
-      address: contracts[SEPOLIA_CHAIN_ID].SablierV2Batch,
-      abi: ABI.SablierV2Batch.abi,
+      address: contracts[SEPOLIA_CHAIN_ID].SablierBatchLockup,
+      abi: ABI.SablierBatchLockup.abi,
       functionName: "createWithRange",
       args: data,
     });
@@ -75,8 +75,8 @@ export default class Periphery {
     console.info("Payload", data);
 
     const tx = await writeContract({
-      address: contracts[SEPOLIA_CHAIN_ID].SablierV2Batch,
-      abi: ABI.SablierV2Batch.abi,
+      address: contracts[SEPOLIA_CHAIN_ID].SablierBatchLockup,
+      abi: ABI.SablierBatchLockup.abi,
       functionName: "createWithMilestones",
       args: data,
     });
@@ -99,8 +99,8 @@ export default class Periphery {
     console.info("Payload", data);
 
     const tx = await writeContract({
-      address: contracts[SEPOLIA_CHAIN_ID].SablierV2Batch,
-      abi: ABI.SablierV2Batch.abi,
+      address: contracts[SEPOLIA_CHAIN_ID].SablierBatchLockup,
+      abi: ABI.SablierBatchLockup.abi,
       functionName: "createWithDeltas",
       args: data,
     });

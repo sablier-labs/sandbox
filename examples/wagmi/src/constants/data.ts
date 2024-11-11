@@ -17,7 +17,7 @@ const now = BigInt(new Date().valueOf().toString().slice(0, -3));
 const now_n = Number(new Date().valueOf().toString().slice(0, -3));
 
 export const APPROVE_BATCH = [
-  "SablierV2Batch",
+  "SablierBatchLockup",
   {
     amount: "1000000",
     token: SEPOLIA_DAI,
@@ -25,7 +25,7 @@ export const APPROVE_BATCH = [
 ] as const;
 
 export const APPROVE_LOCKUP_DYNAMIC = [
-  "SablierV2LockupDynamic",
+  "SablierLockupDynamic",
   {
     amount: "1000000",
     token: SEPOLIA_DAI,
@@ -33,7 +33,7 @@ export const APPROVE_LOCKUP_DYNAMIC = [
 ] as const;
 
 export const APPROVE_LOCKUP_LINEAR = [
-  "SablierV2LockupLinear",
+  "SablierLockupLinear",
   {
     amount: "1000000",
     token: SEPOLIA_DAI,
@@ -125,7 +125,7 @@ export const LOCKUP_DYNAMIC_WITH_DELTAS: ICreateWithDeltas = [
 /** ---------------------------------------------------------------------------------- */
 
 export const BATCH_LOCKUP_LINEAR_WITH_DURATIONS: IBatchCreateWithDurations = [
-  contracts[SEPOLIA_CHAIN_ID].SablierV2LockupLinear,
+  contracts[SEPOLIA_CHAIN_ID].SablierLockupLinear,
   SEPOLIA_DAI,
   [
     {
@@ -157,7 +157,7 @@ export const BATCH_LOCKUP_LINEAR_WITH_DURATIONS: IBatchCreateWithDurations = [
 
 /** 🚨🕣 The END DATE (last parameter in the range tuple) has to be in the future. Make sure to move it at least a few hours after the current moment */
 export const BATCH_LOCKUP_LINEAR_WITH_RANGE: IBatchCreateWithRange = [
-  contracts[SEPOLIA_CHAIN_ID].SablierV2LockupLinear,
+  contracts[SEPOLIA_CHAIN_ID].SablierLockupLinear,
   SEPOLIA_DAI,
   [
     {
@@ -196,7 +196,7 @@ export const BATCH_LOCKUP_LINEAR_WITH_RANGE: IBatchCreateWithRange = [
 ];
 
 export const BATCH_LOCKUP_DYNAMIC_WITH_MILESTONES: IBatchCreateWithMilestones = [
-  contracts[SEPOLIA_CHAIN_ID].SablierV2LockupDynamic,
+  contracts[SEPOLIA_CHAIN_ID].SablierLockupDynamic,
   SEPOLIA_DAI,
   [
     {
@@ -252,7 +252,7 @@ export const BATCH_LOCKUP_DYNAMIC_WITH_MILESTONES: IBatchCreateWithMilestones = 
 
 /** 🚨🕣 The END DATE (last parameter in the range tuple) has to be in the future. Make sure to move it at least a few hours after the current moment */
 export const BATCH_LOCKUP_DYNAMIC_WITH_DELTAS: IBatchCreateWithDeltas = [
-  contracts[SEPOLIA_CHAIN_ID].SablierV2LockupDynamic,
+  contracts[SEPOLIA_CHAIN_ID].SablierLockupDynamic,
   SEPOLIA_DAI,
   [
     {

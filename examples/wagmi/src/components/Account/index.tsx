@@ -1,9 +1,9 @@
-import styled from "styled-components";
 import { useCallback } from "react";
-import { ERC20 } from "../../models";
+import styled from "styled-components";
 import { useAccount, useConnect, useWalletClient } from "wagmi";
-import { SEPOLIA_DAI, SEPOLIA_CHAIN_ID } from "../../constants";
 import { InjectedConnector } from "wagmi/connectors/injected";
+import { SEPOLIA_DAI } from "../../constants";
+import { ERC20 } from "../../models";
 
 const Wrapper = styled.div`
   display: flex;
@@ -94,7 +94,6 @@ function Account() {
             <span> . . . </span>
             <button onClick={onMint}>Mint</button>
           </p>
-         
         </>
       ) : (
         false

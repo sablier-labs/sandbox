@@ -18,9 +18,9 @@ import { SEPOLIA_CHAIN_ID } from "./chains";
 
 export const contracts = {
   [SEPOLIA_CHAIN_ID]: {
-    SablierV2Batch: "0xd2569DC4A58dfE85d807Dffb976dbC0a3bf0B0Fb" as IAddress,
-    SablierV2LockupDynamic: "0xc9940AD8F43aAD8e8f33A4D5dbBf0a8F7FF4429A" as IAddress,
-    SablierV2LockupLinear: "0x7a43F8a888fa15e68C103E18b0439Eb1e98E4301" as IAddress,
+    SablierBatchLockup: "0xd2569DC4A58dfE85d807Dffb976dbC0a3bf0B0Fb" as IAddress,
+    SablierLockupDynamic: "0xc9940AD8F43aAD8e8f33A4D5dbBf0a8F7FF4429A" as IAddress,
+    SablierLockupLinear: "0x7a43F8a888fa15e68C103E18b0439Eb1e98E4301" as IAddress,
   },
 };
 

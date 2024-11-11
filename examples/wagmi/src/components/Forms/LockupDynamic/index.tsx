@@ -1,11 +1,11 @@
-import styled from "styled-components";
-import { Cancelability, Recipient, Segments, Token, Transferability } from "./fields";
 import { useCallback } from "react";
-import { Core, ERC20 } from "../../../models";
-import useStoreForm, { prefill } from "./store";
+import styled from "styled-components";
 import _ from "lodash";
 import { maxUint256 } from "viem";
 import { useAccount } from "wagmi";
+import { Core, ERC20 } from "../../../models";
+import { Cancelability, Recipient, Segments, Token, Transferability } from "./fields";
+import useStoreForm, { prefill } from "./store";
 
 const Wrapper = styled.div`
   display: flex;
@@ -80,12 +80,12 @@ function LockupDynamic() {
       try {
         state.api.update({ error: undefined });
         await ERC20.doApprove(
-          "SablierV2LockupDynamic",
+          "SablierLockupDynamic",
           {
             amount: (maxUint256 / 10n ** 18n).toString(),
             token: state.token,
           },
-          state.api.log
+          state.api.log,
         );
       } catch (error) {
         state.api.update({ error: _.toString(error) });
@@ -113,10 +113,7 @@ function LockupDynamic() {
     const state = useStoreForm.getState();
     const segments = _.clone(state.segments);
     update({
-      segments: [
-        ...segments,
-        { amount: undefined, delta: undefined, exponent: undefined },
-      ],
+      segments: [...segments, { amount: undefined, delta: undefined, exponent: undefined }],
     });
   }, [update]);
 

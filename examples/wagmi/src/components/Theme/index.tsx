@@ -1,10 +1,7 @@
 import type { PropsWithChildren } from "react";
-import {
-  ThemeProvider as Provider,
-  createGlobalStyle,
-} from "styled-components";
-import { normalize } from "styled-normalize";
+import { ThemeProvider as Provider, createGlobalStyle } from "styled-components";
 import { Urbanist } from "next/font/google";
+import { normalize } from "styled-normalize";
 
 const urbanist = Urbanist({
   subsets: ["latin"],
@@ -23,6 +20,7 @@ const colors = {
   red: "#E52E52",
   blue: "#0063FF",
   orange: "#FF9C00",
+  purple: "#874FFF",
 
   transparent: "transparent",
   white: "#FFFFFF",
