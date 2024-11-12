@@ -119,13 +119,7 @@ function Select({ id, label, onChange, value, source }: Props) {
       </Label>
       <Container>
         <Box />
-        <Field
-          as={"select"}
-          id={id}
-          name={id}
-          onChange={onChange}
-          value={value}
-        >
+        <Field as={"select"} id={id} name={id} onChange={onChange} value={value}>
           {source.map((item) => (
             <option key={item.label} value={item.value}>
               {item.label}

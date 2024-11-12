@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 import Headless from "./Headless";
 import LockupDynamic from "./LockupDynamic";
 import LockupLinear from "./LockupLinear";
+import LockupTranched from "./LockupTranched";
 
 const Wrapper = styled.div`
   display: flex;
@@ -67,11 +68,13 @@ const Tabs = styled.div`
 
   &[data-purpose="feature"] {
     ${Tab} {
-      &[data-active="true"] > p {
-        color: ${(props) => props.theme.colors.purple};
-      }
-      &:after {
-        background-color: ${(props) => props.theme.colors.purple};
+      &[data-active="true"] {
+        & > p {
+          color: ${(props) => props.theme.colors.purple};
+        }
+        &:after {
+          background-color: ${(props) => props.theme.colors.purple};
+        }
       }
     }
   }
@@ -126,6 +129,7 @@ function Forms() {
           </Tabs>
           {tab === 0 && <LockupLinear />}
           {tab === 1 && <LockupDynamic />}
+          {tab === 2 && <LockupTranched />}
           {tab === 3 && <Headless />}
         </>
       )}

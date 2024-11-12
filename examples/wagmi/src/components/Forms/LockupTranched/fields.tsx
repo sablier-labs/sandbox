@@ -150,8 +150,8 @@ export function Recipient() {
 }
 
 export function Amount({ index }: { index: number }) {
-  const { segment, update } = useFormStore((state) => ({
-    segment: _.get(state.segments, index) || {},
+  const { tranche, update } = useFormStore((state) => ({
+    tranche: _.get(state.tranches, index) || {},
     update: state.api.update,
   }));
 
@@ -167,10 +167,10 @@ export function Amount({ index }: { index: number }) {
 
       if (value === "" || new RegExp(REGEX_FLOAT).test(value) || new RegExp(REGEX_INTEGER).test(value)) {
         const state = useFormStore.getState();
-        const segments = _.clone(state.segments);
-        segments[index].amount = value;
+        const tranches = _.clone(state.tranches);
+        tranches[index].amount = value;
 
-        update({ segments });
+        update({ tranches });
       }
     },
     [index, update],
@@ -178,19 +178,19 @@ export function Amount({ index }: { index: number }) {
 
   return (
     <Input
-      label={"Segment Amount"}
-      id={"segment_amount"}
-      value={segment.amount}
+      label={"Tranche Amount"}
+      id={"tranche_amount"}
+      value={tranche.amount}
       onChange={onChange}
       format={"text"}
-      placeholder={"Amount streamed this segment, e.g., 100 ..."}
+      placeholder={"Amount streamed this tranche, e.g., 100 ..."}
     />
   );
 }
 
-export function Delta({ index }: { index: number }) {
-  const { segment, update } = useFormStore((state) => ({
-    segment: _.get(state.segments, index) || {},
+export function Duration({ index }: { index: number }) {
+  const { tranche, update } = useFormStore((state) => ({
+    tranche: _.get(state.tranches, index) || {},
     update: state.api.update,
   }));
 
@@ -209,68 +209,27 @@ export function Delta({ index }: { index: number }) {
       }
 
       const state = useFormStore.getState();
-      const segments = _.clone(state.segments);
-      segments[index].duration = value;
+      const tranches = _.clone(state.tranches);
+      tranches[index].duration = value;
 
-      update({ segments });
+      update({ tranches });
     },
     [index, update],
   );
 
   return (
     <Input
-      label={"Segment Delta"}
-      id={"segment_delta"}
-      value={segment.duration}
+      label={"Tranche Duration"}
+      id={"tranche_duration"}
+      value={tranche.duration}
       onChange={onChange}
       format={"text"}
-      placeholder={"Duration of this segment, e.g., 3600 (1 Hour) ..."}
+      placeholder={"Duration of this tranche, e.g., 3600 (1 Hour) ..."}
     />
   );
 }
 
-export function Exponent({ index }: { index: number }) {
-  const { segment, update } = useFormStore((state) => ({
-    segment: _.get(state.segments, index) || {},
-    update: state.api.update,
-  }));
-
-  const onChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const value = (() => {
-        const input = e.target.value;
-        if (_.isNil(input) || _.toString(input).length === 0) {
-          return "";
-        }
-        return _.toString(input);
-      })();
-
-      if (value !== "" && !new RegExp(REGEX_FLOAT).test(value)) {
-        return;
-      }
-
-      const state = useFormStore.getState();
-      const segments = _.clone(state.segments);
-      segments[index].exponent = value;
-
-      update({ segments });
-    },
-    [index, update],
-  );
-
-  return (
-    <Input
-      label={"Segment Exponent"}
-      id={"segment_exponent"}
-      value={segment.exponent}
-      onChange={onChange}
-      format={"text"}
-      placeholder={"Exponent, e.g., 1 for a straight line ..."}
-    />
-  );
-}
-
-const Segment = styled.div`
+const Tranche = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -297,37 +256,36 @@ const Header = styled.div`
 `;
 const Button = styled.button``;
 
-export function Segments() {
-  const { segments, update } = useFormStore((state) => ({
-    segments: state.segments,
+export function Tranches() {
+  const { tranches, update } = useFormStore((state) => ({
+    tranches: state.tranches,
     update: state.api.update,
   }));
 
   const onRemove = useCallback(
     (index: number) => {
       const state = useStoreForm.getState();
-      const segments = _.clone(state.segments);
-      segments.splice(index, 1);
-      update({ segments });
+      const tranches = _.clone(state.tranches);
+      tranches.splice(index, 1);
+      update({ tranches });
     },
     [update],
   );
 
   return (
     <>
-      {segments.map((_segment, index) => (
-        <Segment key={index}>
+      {tranches.map((_tranche, index) => (
+        <Tranche key={index}>
           <Header>
             <p>
-              <b>Segment #{index + 1}</b>
+              <b>Tranche #{index + 1}</b>
             </p>
-            {index === 0 ? false : <Button onClick={() => onRemove(index)}>Remove segment</Button>}
+            {index === 0 ? false : <Button onClick={() => onRemove(index)}>Remove tranche</Button>}
           </Header>
 
           <Amount index={index} />
-          <Delta index={index} />
-          <Exponent index={index} />
-        </Segment>
+          <Duration index={index} />
+        </Tranche>
       ))}
     </>
   );

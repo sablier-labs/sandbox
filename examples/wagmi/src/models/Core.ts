@@ -7,12 +7,15 @@ import type {
   IAddress,
   IAmountWithDecimals,
   IAmountWithDecimals18,
-  ICreateWithDeltas,
-  ICreateWithDurations,
-  ICreateWithMilestones,
-  ICreateWithRange,
+  ICreateDynamicWithDurations,
+  ICreateDynamicWithTimestamps,
+  ICreateLinearWithDurations,
+  ICreateLinearWithTimestamps,
+  ICreateTranchedWithDurations,
+  ICreateTranchedWithTimestamps,
   ISeconds,
   ISegmentD,
+  ITrancheD,
 } from "../types";
 import { erroneous, expect } from "../utils";
 
@@ -65,16 +68,16 @@ export default class Core {
         return 0n;
       })();
 
-      const payload: ICreateWithDurations = [
+      const payload: ICreateLinearWithDurations = {
         sender,
-        state.recipient as IAddress,
-        amount,
-        state.token as IAddress,
-        state.cancelability,
-        state.transferability,
-        { cliff, total: BigInt(state.duration) },
-        { account: zeroAddress, fee: 0n },
-      ];
+        recipient: state.recipient as IAddress,
+        totalAmount: amount,
+        asset: state.token as IAddress,
+        cancelable: state.cancelability,
+        transferable: state.transferability,
+        durations: { cliff: _.toNumber(cliff), total: _.toNumber(state.duration) },
+        broker: { account: zeroAddress, fee: 0n },
+      };
 
       console.info("Payload", payload);
 
@@ -107,7 +110,7 @@ export default class Core {
       recipient: string | undefined;
       segments: {
         amount: string | undefined;
-        delta: string | undefined;
+        duration: string | undefined;
         exponent: string | undefined;
       }[];
       token: string | undefined;
@@ -140,43 +143,43 @@ export default class Core {
         return;
       }
 
-      const segments: ISegmentD[] = state.segments.map((segment) => {
+      const segments: ISegmentD<number>[] = state.segments.map((segment) => {
         if (
           !expect(segment.amount, "segment amount") ||
-          !expect(segment.delta, "segment delta") ||
+          !expect(segment.duration, "segment duration") ||
           !expect(segment.exponent, "segment exponent")
         ) {
           throw new Error("Expected valid segments.");
         }
 
         const amount: IAmountWithDecimals = BigInt(new BigNumber(segment.amount).times(padding).toFixed());
-        const delta: ISeconds = BigInt(segment.delta);
+        const duration: ISeconds<number> = _.toNumber(segment.duration);
         const exponent: IAmountWithDecimals18 = BigInt(segment.exponent) * 10n ** 18n;
 
-        const result: ISegmentD = { amount, exponent, delta };
+        const result: ISegmentD<number> = { amount, exponent, duration };
 
         return result;
       });
 
       const amount = segments.reduce((prev, curr) => prev + (curr?.amount || 0n), 0n);
 
-      const payload: ICreateWithDeltas = [
+      const payload: ICreateDynamicWithDurations = {
         sender,
-        state.cancelability,
-        state.transferability,
-        state.recipient as IAddress,
-        amount,
-        state.token as IAddress,
-        { account: zeroAddress, fee: 0n },
+        cancelable: state.cancelability,
+        transferable: state.transferability,
+        recipient: state.recipient as IAddress,
+        totalAmount: amount,
+        asset: state.token as IAddress,
+        broker: { account: zeroAddress, fee: 0n },
         segments,
-      ];
+      };
 
       console.info("Payload", payload);
 
       const tx = await writeContract({
         address: contracts[SEPOLIA_CHAIN_ID].SablierLockupDynamic,
         abi: ABI.SablierLockupDynamic.abi,
-        functionName: "createWithDeltas",
+        functionName: "createWithDurations",
         args: [payload],
       });
 
@@ -196,14 +199,103 @@ export default class Core {
     }
   }
 
-  static async doCreateLinearWithDurationsRaw(payload: ICreateWithDurations) {
-    const data = _.clone(payload);
-    if (data[0].toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
+  static async doCreateTranched(
+    state: {
+      cancelability: boolean;
+      recipient: string | undefined;
+      tranches: {
+        amount: string | undefined;
+        duration: string | undefined;
+      }[];
+      token: string | undefined;
+      transferability: boolean;
+    },
+    log: (value: string) => void,
+  ) {
+    try {
+      if (
+        !expect(state.tranches, "tranches") ||
+        !expect(state.cancelability, "cancelability") ||
+        !expect(state.recipient, "recipient") ||
+        !expect(state.token, "token") ||
+        !expect(state.transferability, "transferability")
+      ) {
+        return;
+      }
+
+      const decimals = await readContract({
+        address: state.token as IAddress,
+        abi: ABI.ERC20.abi,
+        functionName: "decimals",
+      });
+
+      /** We use BigNumber to convert float values to decimal padded BigInts */
+      const padding = new BigNumber(10).pow(new BigNumber(decimals.toString()));
+
       const sender = await getAccount().address;
       if (!expect(sender, "sender")) {
         return;
       }
-      data[0] = sender;
+
+      const tranches: ITrancheD<number>[] = state.tranches.map((tranche) => {
+        if (!expect(tranche.amount, "tranche amount") || !expect(tranche.duration, "tranche duration")) {
+          throw new Error("Expected valid tranches.");
+        }
+
+        const amount: IAmountWithDecimals = BigInt(new BigNumber(tranche.amount).times(padding).toFixed());
+        const duration: ISeconds<number> = _.toNumber(tranche.duration);
+
+        const result: ITrancheD<number> = { amount, duration };
+
+        return result;
+      });
+
+      const amount = tranches.reduce((prev, curr) => prev + (curr?.amount || 0n), 0n);
+
+      const payload: ICreateTranchedWithDurations = {
+        sender,
+        cancelable: state.cancelability,
+        transferable: state.transferability,
+        recipient: state.recipient as IAddress,
+        totalAmount: amount,
+        asset: state.token as IAddress,
+        broker: { account: zeroAddress, fee: 0n },
+        tranches,
+      };
+
+      console.info("Payload", payload);
+
+      const tx = await writeContract({
+        address: contracts[SEPOLIA_CHAIN_ID].SablierLockupTranched,
+        abi: ABI.SablierLockupTranched.abi,
+        functionName: "createWithDurations",
+        args: [payload],
+      });
+
+      if (tx.hash) {
+        log(`LT Stream sent to the blockchain with hash: ${tx.hash}.`);
+      }
+
+      const receipt = await waitForTransaction({ hash: tx.hash });
+
+      if (receipt?.status === "success") {
+        log(`LT Stream successfully created.`);
+      } else {
+        log(`LT Stream creation failed.`);
+      }
+    } catch (error) {
+      erroneous(error);
+    }
+  }
+
+  static async doCreateLinearWithDurationsRaw(payload: ICreateLinearWithDurations) {
+    const data = _.clone(payload);
+    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
+      const sender = await getAccount().address;
+      if (!expect(sender, "sender")) {
+        return;
+      }
+      data.sender = sender;
     }
 
     console.info("Payload", data);
@@ -217,14 +309,14 @@ export default class Core {
     return waitForTransaction({ hash: tx.hash });
   }
 
-  static async doCreateLinearWithRangeRaw(payload: ICreateWithRange) {
+  static async doCreateLinearWithTimestampsRaw(payload: ICreateLinearWithTimestamps) {
     const data = _.clone(payload);
-    if (data[0].toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
+    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
       const sender = await getAccount().address;
       if (!expect(sender, "sender")) {
         return;
       }
-      data[0] = sender;
+      data.sender = sender;
     }
 
     console.info("Payload", data);
@@ -232,20 +324,20 @@ export default class Core {
     const tx = await writeContract({
       address: contracts[SEPOLIA_CHAIN_ID].SablierLockupLinear,
       abi: ABI.SablierLockupLinear.abi,
-      functionName: "createWithRange",
+      functionName: "createWithTimestamps",
       args: [data],
     });
     return waitForTransaction({ hash: tx.hash });
   }
 
-  static async doCreateDynamicWithDeltasRaw(payload: ICreateWithDeltas) {
+  static async doCreateDynamicWithDurationsRaw(payload: ICreateDynamicWithDurations) {
     const data = _.clone(payload);
-    if (data[0].toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
+    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
       const sender = await getAccount().address;
       if (!expect(sender, "sender")) {
         return;
       }
-      data[0] = sender;
+      data.sender = sender;
     }
 
     console.info("Payload", data);
@@ -253,20 +345,20 @@ export default class Core {
     const tx = await writeContract({
       address: contracts[SEPOLIA_CHAIN_ID].SablierLockupDynamic,
       abi: ABI.SablierLockupDynamic.abi,
-      functionName: "createWithDeltas",
+      functionName: "createWithDurations",
       args: [data],
     });
     return waitForTransaction({ hash: tx.hash });
   }
 
-  static async doCreateDynamicWithMilestonesRaw(payload: ICreateWithMilestones) {
+  static async doCreateDynamicWithTimestampsRaw(payload: ICreateDynamicWithTimestamps) {
     const data = _.clone(payload);
-    if (data[0].toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
+    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
       const sender = await getAccount().address;
       if (!expect(sender, "sender")) {
         return;
       }
-      data[0] = sender;
+      data.sender = sender;
     }
 
     console.info("Payload", data);
@@ -274,7 +366,49 @@ export default class Core {
     const tx = await writeContract({
       address: contracts[SEPOLIA_CHAIN_ID].SablierLockupDynamic,
       abi: ABI.SablierLockupDynamic.abi,
-      functionName: "createWithMilestones",
+      functionName: "createWithTimestamps",
+      args: [data],
+    });
+    return waitForTransaction({ hash: tx.hash });
+  }
+
+  static async doCreateTranchedWithDurationsRaw(payload: ICreateTranchedWithDurations) {
+    const data = _.clone(payload);
+    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
+      const sender = await getAccount().address;
+      if (!expect(sender, "sender")) {
+        return;
+      }
+      data.sender = sender;
+    }
+
+    console.info("Payload", data);
+
+    const tx = await writeContract({
+      address: contracts[SEPOLIA_CHAIN_ID].SablierLockupTranched,
+      abi: ABI.SablierLockupTranched.abi,
+      functionName: "createWithDurations",
+      args: [data],
+    });
+    return waitForTransaction({ hash: tx.hash });
+  }
+
+  static async doCreateTranchedWithTimestampsRaw(payload: ICreateTranchedWithTimestamps) {
+    const data = _.clone(payload);
+    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
+      const sender = await getAccount().address;
+      if (!expect(sender, "sender")) {
+        return;
+      }
+      data.sender = sender;
+    }
+
+    console.info("Payload", data);
+
+    const tx = await writeContract({
+      address: contracts[SEPOLIA_CHAIN_ID].SablierLockupTranched,
+      abi: ABI.SablierLockupTranched.abi,
+      functionName: "createWithTimestamps",
       args: [data],
     });
     return waitForTransaction({ hash: tx.hash });

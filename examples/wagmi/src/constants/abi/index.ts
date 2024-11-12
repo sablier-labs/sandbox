@@ -1,13 +1,17 @@
-import { default as SablierLockupDynamic } from "@sablier/v2-core/artifacts/SablierV2LockupDynamic.json";
-import { default as SablierLockupLinear } from "@sablier/v2-core/artifacts/SablierV2LockupLinear.json";
-import { default as SablierBatchLockup } from "@sablier/v2-periphery/artifacts/SablierV2BatchLockup.json";
 import { default as ERC20 } from "./ERC20Mintable";
+import { default as SablierBatchLockup } from "./SablierBatchLockup";
+import { default as SablierFlow } from "./SablierFlow";
+import { default as SablierLockupDynamic } from "./SablierLockupDynamic";
+import { default as SablierLockupLinear } from "./SablierLockupLinear";
+import { default as SablierLockupTranched } from "./SablierLockupTranched";
 
 const ABI = {
   ERC20,
   SablierBatchLockup,
+  SablierFlow,
   SablierLockupDynamic,
   SablierLockupLinear,
+  SablierLockupTranched,
 } as const;
 
 export default ABI;

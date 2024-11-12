@@ -112,14 +112,7 @@ interface Props {
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-function Input({
-  id,
-  format = "text",
-  label,
-  onChange,
-  placeholder,
-  value,
-}: Props) {
+function Input({ id, format = "text", label, onChange, placeholder, value }: Props) {
   return (
     <Wrapper>
       <Label>

@@ -1,21 +1,21 @@
-import styled from "styled-components";
-import { Core, ERC20, Periphery } from "../../../models";
 import { useCallback } from "react";
+import styled from "styled-components";
 import _ from "lodash";
+import { useAccount } from "wagmi";
 import {
   APPROVE_BATCH,
-  APPROVE_LOCKUP_LINEAR,
   APPROVE_LOCKUP_DYNAMIC,
+  APPROVE_LOCKUP_LINEAR,
+  BATCH_LOCKUP_DYNAMIC_WITH_DURATIONS,
+  BATCH_LOCKUP_DYNAMIC_WITH_TIMESTAMPS,
   BATCH_LOCKUP_LINEAR_WITH_DURATIONS,
-  BATCH_LOCKUP_LINEAR_WITH_RANGE,
-  BATCH_LOCKUP_DYNAMIC_WITH_MILESTONES,
-  BATCH_LOCKUP_DYNAMIC_WITH_DELTAS,
+  BATCH_LOCKUP_LINEAR_WITH_TIMESTAMPS,
+  LOCKUP_DYNAMIC_WITH_DURATIONS,
+  LOCKUP_DYNAMIC_WITH_TIMESTAMPS,
   LOCKUP_LINEAR_WITH_DURATIONS,
-  LOCKUP_LINEAR_WITH_RANGE,
-  LOCKUP_DYNAMIC_WITH_DELTAS,
-  LOCKUP_DYNAMIC_WITH_MILESTONES,
+  LOCKUP_LINEAR_WITH_TIMESTAMPS,
 } from "../../../constants/data";
-import { useAccount } from "wagmi";
+import { Core, ERC20, Periphery } from "../../../models";
 
 const WrapperPartial = styled.div`
   display: grid;
@@ -115,7 +115,7 @@ function Single() {
   const onCreateLockupLinearWithRange = useCallback(async () => {
     if (isConnected) {
       try {
-        await Core.doCreateLinearWithRangeRaw(LOCKUP_LINEAR_WITH_RANGE);
+        await Core.doCreateLinearWithTimestampsRaw(LOCKUP_LINEAR_WITH_TIMESTAMPS);
       } catch (error) {
         console.error(error);
       }
@@ -125,7 +125,7 @@ function Single() {
   const onCreateLockupDynamicWithDeltas = useCallback(async () => {
     if (isConnected) {
       try {
-        await Core.doCreateDynamicWithDeltasRaw(LOCKUP_DYNAMIC_WITH_DELTAS);
+        await Core.doCreateDynamicWithDurationsRaw(LOCKUP_DYNAMIC_WITH_DURATIONS);
       } catch (error) {
         console.error(error);
       }
@@ -135,9 +135,7 @@ function Single() {
   const onCreateLockupDynamicWithMilestones = useCallback(async () => {
     if (isConnected) {
       try {
-        await Core.doCreateDynamicWithMilestonesRaw(
-          LOCKUP_DYNAMIC_WITH_MILESTONES
-        );
+        await Core.doCreateDynamicWithTimestampsRaw(LOCKUP_DYNAMIC_WITH_TIMESTAMPS);
       } catch (error) {
         console.error(error);
       }
@@ -188,7 +186,7 @@ function Single() {
         <Header>
           <p>
             <b>
-            Lockup Linear stream <span>with Range</span>
+              Lockup Linear stream <span>with Range</span>
             </b>
           </p>
         </Header>
@@ -224,9 +222,7 @@ function Batch() {
   const onBatchCreateLockupLinearWithDurations = useCallback(async () => {
     if (isConnected) {
       try {
-        await Periphery.doBatchCreateLinearWithDurationsRaw(
-          BATCH_LOCKUP_LINEAR_WITH_DURATIONS
-        );
+        await Periphery.doBatchCreateLinearWithDurationsRaw(BATCH_LOCKUP_LINEAR_WITH_DURATIONS);
       } catch (error) {
         console.error(error);
       }
@@ -236,9 +232,7 @@ function Batch() {
   const onBatchCreateLockupLinearWithRange = useCallback(async () => {
     if (isConnected) {
       try {
-        await Periphery.doBatchCreateLinearWithRangeRaw(
-          BATCH_LOCKUP_LINEAR_WITH_RANGE
-        );
+        await Periphery.doBatchCreateLinearWithTimestampsRaw(BATCH_LOCKUP_LINEAR_WITH_TIMESTAMPS);
       } catch (error) {
         console.error(error);
       }
@@ -248,9 +242,7 @@ function Batch() {
   const onBatchCreateLockupDynamicWithMilestones = useCallback(async () => {
     if (isConnected) {
       try {
-        await Periphery.doBatchCreateDynamicWithMilestonesRaw(
-          BATCH_LOCKUP_DYNAMIC_WITH_MILESTONES
-        );
+        await Periphery.doBatchCreateDynamicWithTimestampsRaw(BATCH_LOCKUP_DYNAMIC_WITH_TIMESTAMPS);
       } catch (error) {
         console.error(error);
       }
@@ -260,9 +252,7 @@ function Batch() {
   const onBatchCreateLockupDynamicWithDeltas = useCallback(async () => {
     if (isConnected) {
       try {
-        await Periphery.doBatchCreateDynamicWithDeltasRaw(
-          BATCH_LOCKUP_DYNAMIC_WITH_DELTAS
-        );
+        await Periphery.doBatchCreateDynamicWithDurationsRaw(BATCH_LOCKUP_DYNAMIC_WITH_DURATIONS);
       } catch (error) {
         console.error(error);
       }
@@ -319,9 +309,7 @@ function Batch() {
             </b>
           </p>
         </Header>
-        <Button onClick={onBatchCreateLockupDynamicWithMilestones}>
-          Create
-        </Button>
+        <Button onClick={onBatchCreateLockupDynamicWithMilestones}>Create</Button>
       </Box>
     </Wrapper>
   );

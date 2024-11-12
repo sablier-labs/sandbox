@@ -1,9 +1,9 @@
 import { shallow } from "zustand/shallow";
 import { createWithEqualityFn } from "zustand/traditional";
 import { SEPOLIA_DAI } from "../../../constants";
-import type { IStoreFormDynamic } from "../../../types";
+import type { IStoreFormTranched } from "../../../types";
 
-const initial: Omit<IStoreFormDynamic, "api"> = {
+const initial: Omit<IStoreFormTranched, "api"> = {
   error: undefined,
   logs: [],
 
@@ -12,16 +12,15 @@ const initial: Omit<IStoreFormDynamic, "api"> = {
   token: undefined,
   transferability: true,
 
-  segments: [
+  tranches: [
     {
       amount: undefined,
       duration: undefined,
-      exponent: undefined,
     },
   ],
 };
 
-const prefill: Omit<IStoreFormDynamic, "api"> = {
+const prefill: Omit<IStoreFormTranched, "api"> = {
   error: undefined,
   logs: [],
 
@@ -30,31 +29,19 @@ const prefill: Omit<IStoreFormDynamic, "api"> = {
   token: SEPOLIA_DAI,
   transferability: true,
 
-  segments: [
+  tranches: [
     {
-      amount: "0",
-      duration: "43199", // 12hrs - 1 second
-      exponent: "1",
+      amount: "50",
+      duration: "43200", // 12hrs
     },
     {
       amount: "50",
-      duration: "1", // 1 second
-      exponent: "1",
-    },
-    {
-      amount: "0",
-      duration: "43199", // 12hrs - 1 second
-      exponent: "1",
-    },
-    {
-      amount: "50",
-      duration: "1", // 1 second
-      exponent: "1",
+      duration: "43200", // 12hrs
     },
   ],
 };
 
-const useStoreForm = createWithEqualityFn<IStoreFormDynamic>(
+const useStoreForm = createWithEqualityFn<IStoreFormTranched>(
   (set) => ({
     ...initial,
     api: {
@@ -64,7 +51,7 @@ const useStoreForm = createWithEqualityFn<IStoreFormDynamic>(
             logs: [...prev.logs, value],
           };
         }),
-      update: (updates: Partial<IStoreFormDynamic>) =>
+      update: (updates: Partial<IStoreFormTranched>) =>
         set((_prev) => {
           return {
             ...updates,

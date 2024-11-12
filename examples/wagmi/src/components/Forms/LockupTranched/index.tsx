@@ -4,7 +4,7 @@ import _ from "lodash";
 import { maxUint256 } from "viem";
 import { useAccount } from "wagmi";
 import { Core, ERC20 } from "../../../models";
-import { Cancelability, Recipient, Segments, Token, Transferability } from "./fields";
+import { Cancelability, Recipient, Token, Tranches, Transferability } from "./fields";
 import useStoreForm, { prefill } from "./store";
 
 const Wrapper = styled.div`
@@ -67,7 +67,7 @@ const Actions = styled.div`
   }
 `;
 
-function LockupDynamic() {
+function LockupTranched() {
   const { isConnected } = useAccount();
   const { error, logs, update } = useStoreForm((state) => ({
     error: state.error,
@@ -80,7 +80,7 @@ function LockupDynamic() {
       try {
         state.api.update({ error: undefined });
         await ERC20.doApprove(
-          "SablierLockupDynamic",
+          "SablierLockupTranched",
           {
             amount: (maxUint256 / 10n ** 18n).toString(),
             token: state.token,
@@ -98,7 +98,7 @@ function LockupDynamic() {
       const state = useStoreForm.getState();
       try {
         state.api.update({ error: undefined });
-        await Core.doCreateDynamic(state, state.api.log);
+        await Core.doCreateTranched(state, state.api.log);
       } catch (error) {
         state.api.update({ error: _.toString(error) });
       }
@@ -111,9 +111,9 @@ function LockupDynamic() {
 
   const onAdd = useCallback(() => {
     const state = useStoreForm.getState();
-    const segments = _.clone(state.segments);
+    const tranches = _.clone(state.tranches);
     update({
-      segments: [...segments, { amount: undefined, duration: undefined, exponent: undefined }],
+      tranches: [...tranches, { amount: undefined, duration: undefined }],
     });
   }, [update]);
 
@@ -123,14 +123,14 @@ function LockupDynamic() {
       <Transferability />
       <Token />
       <Recipient />
-      <Segments />
+      <Tranches />
       <Divider />
       <Actions>
         <Button onClick={onPrefill}>Prefill form</Button>
-        <Button onClick={onAdd}>Add segment</Button>
+        <Button onClick={onAdd}>Add tranche</Button>
         <div />
         <Button onClick={onApprove}>Approve token spending</Button>
-        <Button onClick={onCreate}>Create LD stream</Button>
+        <Button onClick={onCreate}>Create LT stream</Button>
       </Actions>
       {error && <Error>{error}</Error>}
       {logs.length > 0 && (
@@ -150,4 +150,4 @@ function LockupDynamic() {
   );
 }
 
-export default LockupDynamic;
+export default LockupTranched;
