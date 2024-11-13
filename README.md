@@ -43,9 +43,9 @@ We also support examples of how to **Withdraw** from a Flow stream.
 The official Sablier interface uses [wagmi](wagmi.sh/) and [viem](https://viem.sh/). Both libraries offer top-notch
 support (check the docs and their github) and integrate nicely with wallet managers like RainbowKit or AppKit.
 
-| Lockup Linear (Form)                       | Lockup Dynamic (Form)                       | Headless                             |
-| ------------------------------------------ | ------------------------------------------- | ------------------------------------ |
-| ![LL](./packages/assets/lockup-linear.png) | ![LD](./packages/assets/lockup-dynamic.png) | ![H](./packages/assets/headless.png) |
+| Flow (Form)                       | Lockup Dynamic (Form)                       | Headless                             |
+| --------------------------------- | ------------------------------------------- | ------------------------------------ |
+| ![FL](./packages/assets/flow.png) | ![LD](./packages/assets/lockup-dynamic.png) | ![H](./packages/assets/headless.png) |
 
 #### Features
 
@@ -75,7 +75,7 @@ tweak the parameters to create streams of different values or shapes (segments).
 **↪ Misc.**
 
 - Mint [Sepolia DAI](https://sepolia.etherscan.io/token/0x776b6fc2ed15d6bb5fc32e0c89de68683118c62a) tokens
-- Approve spending DAI tokens for any Lockup stream
+- Approve spending DAI tokens for any Lockup or Flow contract
 
 #### Next steps
 
@@ -101,8 +101,8 @@ a small app that runs on the Sepolia testnet and provides an injected wallet con
 > [!TIP]
 >
 > The Ethers examples do not include all possible variations, so we invite you to look into the Wagmi examples and
-> attempt to reproduce them yourself, with Ethers.
+> attempt to convert them yourself.
 
 #### Features
 
-- Create an LL, LD or LT stream with Durations in headless mode (tweak durations in code)
+- Create an LL, LD or LT stream with Durations or Timestamps in headless mode (tweak durations in code)
