@@ -11,6 +11,7 @@ const urbanist = Urbanist({
 const colors = {
   black: "#000000",
   dark: "#14161F",
+  dark050: "#1a1d28",
   dark100: "#1e212f",
   dark200: "#242838",
   dark300: "#2a2e41",
@@ -71,8 +72,8 @@ const GlobalStyle = createGlobalStyle<{ theme: ThemeType }>`
     min-height: 100vh;
     margin: 0rem;
     padding: 0rem;
-    color: ${(props) => props.theme.colors.dark};
-    background-color: #FAFAFA;
+    color: ${(props) => props.theme.colors.white};
+    background-color: ${(props) => props.theme.colors.dark200};
 
     font-family: var(--font-urbanist);
     cursor: auto;

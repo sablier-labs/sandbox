@@ -1,10 +1,9 @@
 import { useCallback } from "react";
 import styled from "styled-components";
 import _ from "lodash";
-import { maxUint256 } from "viem";
 import { useAccount } from "wagmi";
-import { ERC20, LockupCore } from "../../../models";
-import { Cancelability, Recipient, Token, Tranches, Transferability } from "./fields";
+import { ERC20, FlowCore } from "../../../models";
+import { InitialDeposit, RatePerSecond, Recipient, Token, Transferability } from "./fields";
 import useStoreForm, { prefill } from "./store";
 
 const Wrapper = styled.div`
@@ -67,7 +66,7 @@ const Actions = styled.div`
   }
 `;
 
-function LockupTranched() {
+function Flow() {
   const { isConnected } = useAccount();
   const { error, logs, update } = useStoreForm((state) => ({
     error: state.error,
@@ -79,14 +78,7 @@ function LockupTranched() {
       const state = useStoreForm.getState();
       try {
         state.api.update({ error: undefined });
-        await ERC20.doApprove(
-          "SablierLockupTranched",
-          {
-            amount: (maxUint256 / 10n ** 18n).toString(),
-            token: state.token,
-          },
-          state.api.log,
-        );
+        await ERC20.doApprove("SablierFlow", { amount: state.initialDeposit, token: state.token }, state.api.log);
       } catch (error) {
         state.api.update({ error: _.toString(error) });
       }
@@ -98,7 +90,7 @@ function LockupTranched() {
       const state = useStoreForm.getState();
       try {
         state.api.update({ error: undefined });
-        await LockupCore.doCreateTranched(state, state.api.log);
+        await FlowCore.doCreateAndDeposit(state, state.api.log);
       } catch (error) {
         state.api.update({ error: _.toString(error) });
       }
@@ -109,28 +101,19 @@ function LockupTranched() {
     update(prefill);
   }, [update]);
 
-  const onAdd = useCallback(() => {
-    const state = useStoreForm.getState();
-    const tranches = _.clone(state.tranches);
-    update({
-      tranches: [...tranches, { amount: undefined, duration: undefined }],
-    });
-  }, [update]);
-
   return (
     <Wrapper>
-      <Cancelability />
       <Transferability />
       <Token />
+      <RatePerSecond />
+      <InitialDeposit />
       <Recipient />
-      <Tranches />
       <Divider />
       <Actions>
         <Button onClick={onPrefill}>Prefill form</Button>
-        <Button onClick={onAdd}>Add tranche</Button>
         <div />
         <Button onClick={onApprove}>Approve token spending</Button>
-        <Button onClick={onCreate}>Create LT stream</Button>
+        <Button onClick={onCreate}>Create Flow stream</Button>
       </Actions>
       {error && <Error>{error}</Error>}
       {logs.length > 0 && (
@@ -150,4 +133,4 @@ function LockupTranched() {
   );
 }
 
-export default LockupTranched;
+export default Flow;

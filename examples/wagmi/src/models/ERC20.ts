@@ -1,11 +1,12 @@
 import BigNumber from "bignumber.js";
 import _ from "lodash";
-import { getAccount, readContract, waitForTransaction, writeContract } from "wagmi/actions";
+import { getAccount, readContract, waitForTransactionReceipt, writeContract } from "wagmi/actions";
+import { config } from "../components/Web3";
 import { ABI, SEPOLIA_CHAIN_ID, contracts } from "../constants";
 import type { IAddress } from "../types";
 import { erroneous, expect } from "../utils";
 
-export default class ERC20 {
+class ERC20 {
   static async doApprove(
     spender: keyof (typeof contracts)[typeof SEPOLIA_CHAIN_ID],
     state: {
@@ -19,7 +20,7 @@ export default class ERC20 {
         return;
       }
 
-      const decimals = await readContract({
+      const decimals = await readContract(config, {
         address: state.token as IAddress,
         abi: ABI.ERC20.abi,
         functionName: "decimals",
@@ -27,18 +28,18 @@ export default class ERC20 {
 
       const amount = BigInt(state.amount) * 10n ** BigInt(decimals);
 
-      const tx = await writeContract({
+      const hash = await writeContract(config, {
         address: state.token as IAddress,
         abi: ABI.ERC20.abi,
         functionName: "approve",
         args: [contracts[SEPOLIA_CHAIN_ID][spender], amount],
       });
 
-      if (tx.hash) {
-        log(`Token approval sent to the blockchain with hash: ${tx.hash}.`);
+      if (hash) {
+        log(`Token approval sent to the blockchain with hash: ${hash}.`);
       }
 
-      const receipt = await waitForTransaction({ hash: tx.hash });
+      const receipt = await waitForTransactionReceipt(config, { hash });
 
       if (receipt?.status === "success") {
         log(`Token approval executed successfully.`);
@@ -57,7 +58,7 @@ export default class ERC20 {
         return;
       }
 
-      const decimals = await readContract({
+      const decimals = await readContract(config, {
         address: token,
         abi: ABI.ERC20.abi,
         functionName: "decimals",
@@ -67,13 +68,13 @@ export default class ERC20 {
       const padding = new BigNumber(10).pow(new BigNumber(decimals.toString()));
       const amount = BigInt(new BigNumber("100000").times(padding).toFixed());
 
-      const sender = await getAccount().address;
+      const sender = await getAccount(config).address;
       if (!expect(sender, "sender")) {
         console.error("sender is undefined");
         return;
       }
 
-      const _tx = await writeContract({
+      const _hash = await writeContract(config, {
         address: token,
         abi: ABI.ERC20.abi,
         functionName: "mint",
@@ -84,3 +85,5 @@ export default class ERC20 {
     }
   }
 }
+
+export default ERC20;

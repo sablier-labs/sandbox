@@ -11,7 +11,7 @@ const Wrapper = styled.div`
 
 const Label = styled.div`
   & > label {
-    color: ${(props) => props.theme.colors.dark};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 500;
   }
 `;
@@ -34,8 +34,8 @@ export const Box = styled.div`
   z-index: 10;
   width: 100%;
   height: 100%;
-  border-radius: 6px;
-  background-color: ${(props) => props.theme.colors.white};
+  border-radius: 4px;
+  background-color: ${(props) => props.theme.colors.dark050};
 `;
 
 export const Highlight = styled.div`
@@ -45,8 +45,8 @@ export const Highlight = styled.div`
   z-index: 30;
   width: 100%;
   height: 100%;
-  border-radius: 6px;
-  outline: 1px solid ${(props) => props.theme.colors.gray};
+  border-radius: 4px;
+  outline: 1px solid ${(props) => props.theme.colors.dark300};
   pointer-events: none;
 `;
 
@@ -62,7 +62,7 @@ const Field = styled.input`
   height: 36px;
   min-width: 0;
   padding: 0 16px;
-  color: ${(props) => props.theme.colors.dark};
+  color: ${(props) => props.theme.colors.white};
   border: none;
   background: transparent;
   outline: none;
@@ -82,7 +82,7 @@ const Field = styled.input`
   }
 
   &::placeholder {
-    color: ${(props) => props.theme.colors.gray300};
+    color: ${(props) => props.theme.colors.gray500};
     font-weight: 400;
     font-size: 12pt;
     font-style: italic;

@@ -1,10 +1,13 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { useAccount } from "wagmi";
-import Headless from "./Headless";
+import Flow from "./Flow";
+import FlowWithdraw from "./FlowWithdraw";
 import LockupDynamic from "./LockupDynamic";
+import LockupHeadless from "./LockupHeadless";
 import LockupLinear from "./LockupLinear";
 import LockupTranched from "./LockupTranched";
+import LockupWithdraw from "./LockupWithdraw";
 
 const Wrapper = styled.div`
   display: flex;
@@ -12,7 +15,8 @@ const Wrapper = styled.div`
   gap: 16px;
   width: 100%;
   border-radius: 6px;
-  border: 1px solid ${(props) => props.theme.colors.gray};
+  border: 2px solid ${(props) => props.theme.colors.dark300};
+  background-color: ${(props) => props.theme.colors.dark050};
 `;
 
 const Tab = styled.div`
@@ -23,27 +27,20 @@ const Tab = styled.div`
   justify-content: center;
   text-align: center;
   position: relative;
-  & > p {
-    font-weight: 600;
-  }
 
-  &:after {
-    content: "";
-    display: none;
-    position: absolute;
-    bottom: -1px;
-    width: 160px;
-    height: 2px;
-    border-radius: 1px;
-    background-color: ${(props) => props.theme.colors.orange};
+  & > p {
+    width: 100%;
+    max-width: calc(100% - 8px);
+    text-align: center;
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 4px;
   }
 
   &[data-active="true"] {
-    &:after {
-      display: flex;
-    }
     & > p {
-      color: ${(props) => props.theme.colors.orange};
+      background-color: ${(props) => props.theme.colors.orange};
+      color: ${(props) => props.theme.colors.white};
     }
   }
 
@@ -51,9 +48,9 @@ const Tab = styled.div`
     cursor: pointer;
     &:hover,
     &:active {
-      &:after {
-        display: flex;
-        background-color: ${(props) => props.theme.colors.dark};
+      p {
+        background-color: ${(props) => props.theme.colors.dark200};
+        color: ${(props) => props.theme.colors.white};
       }
     }
   }
@@ -61,19 +58,18 @@ const Tab = styled.div`
 
 const Tabs = styled.div`
   width: 100%;
-  border-bottom: 1px solid ${(props) => props.theme.colors.gray};
+  border-bottom: 1px solid ${(props) => props.theme.colors.dark300};
   display: flex;
   align-items: center;
   height: 80px;
+  padding: 0 12px;
 
   &[data-purpose="feature"] {
     ${Tab} {
       &[data-active="true"] {
         & > p {
-          color: ${(props) => props.theme.colors.purple};
-        }
-        &:after {
           background-color: ${(props) => props.theme.colors.purple};
+          color: ${(props) => props.theme.colors.white};
         }
       }
     }
@@ -115,22 +111,26 @@ function Forms() {
         <>
           <Tabs>
             <Tab data-active={tab === 0} onClick={() => setTab(0)}>
-              <p>Create Linear</p>
+              <p>🛠️ Linear</p>
             </Tab>
             <Tab data-active={tab === 1} onClick={() => setTab(1)}>
-              <p>Create Dynamic</p>
+              <p>🛠️ Dynamic</p>
             </Tab>
             <Tab data-active={tab === 2} onClick={() => setTab(2)}>
-              <p>Create Tranched</p>
+              <p>🛠️ Tranched</p>
             </Tab>
             <Tab data-active={tab === 3} onClick={() => setTab(3)}>
-              <p>Headless</p>
+              <p>⬇️ Withdraw</p>
+            </Tab>
+            <Tab data-active={tab === 4} onClick={() => setTab(4)}>
+              <p>🤖 Headless</p>
             </Tab>
           </Tabs>
           {tab === 0 && <LockupLinear />}
           {tab === 1 && <LockupDynamic />}
           {tab === 2 && <LockupTranched />}
-          {tab === 3 && <Headless />}
+          {tab === 3 && <LockupWithdraw />}
+          {tab === 4 && <LockupHeadless />}
         </>
       )}
 
@@ -138,12 +138,14 @@ function Forms() {
         <>
           <Tabs>
             <Tab data-active={tab === 0} onClick={() => setTab(0)}>
-              <p>Create & Deposit</p>
+              <p>🛠️ Create & Deposit</p>
             </Tab>
             <Tab data-active={tab === 1} onClick={() => setTab(1)}>
-              <p>Withdraw</p>
+              <p>⬇️ Withdraw</p>
             </Tab>
           </Tabs>
+          {tab === 0 && <Flow />}
+          {tab === 1 && <FlowWithdraw />}
         </>
       )}
     </Wrapper>

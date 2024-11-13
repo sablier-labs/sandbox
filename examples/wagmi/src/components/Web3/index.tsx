@@ -1,18 +1,19 @@
-import { useEffect, type PropsWithChildren, useState } from "react";
+import { type PropsWithChildren, useEffect, useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import _ from "lodash";
-
-import { WagmiConfig, configureChains, createConfig, useConnect } from "wagmi";
+import { WagmiProvider, createConfig, http } from "wagmi";
 import { sepolia } from "wagmi/chains";
-import { publicProvider } from "wagmi/providers/public";
-import { InjectedConnector } from "wagmi/connectors/injected";
+import { injected, metaMask } from "wagmi/connectors";
 
-const { chains, publicClient } = configureChains([sepolia], [publicProvider()]);
-
-const config = createConfig({
-  autoConnect: true,
-  publicClient,
-  connectors: [new InjectedConnector({ chains })],
+export const config = createConfig({
+  chains: [sepolia],
+  connectors: [injected()],
+  transports: {
+    [sepolia.id]: http(),
+  },
 });
+
+const queryClient = new QueryClient();
 
 function Body({ children }: PropsWithChildren<unknown>) {
   const [isMounted, setIsMounted] = useState(false);
@@ -27,10 +28,14 @@ function Body({ children }: PropsWithChildren<unknown>) {
   return children;
 }
 
-export default function Web3Provider({ children }: PropsWithChildren<unknown>) {
+function Web3Provider({ children }: PropsWithChildren<unknown>) {
   return (
-    <WagmiConfig config={config}>
-      <Body>{children}</Body>
-    </WagmiConfig>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <Body>{children}</Body>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
+
+export default Web3Provider;

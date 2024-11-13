@@ -362,7 +362,7 @@ export const BATCH_LOCKUP_DYNAMIC_WITH_DURATIONS: IBatchCreateDynamicWithDuratio
   ],
 ];
 
-export const BATCH_LOCKUP_TRANCHES_WITH_TIMESTAMPS: IBatchCreateTranchedWithTimestamps = [
+export const BATCH_LOCKUP_TRANCHED_WITH_TIMESTAMPS: IBatchCreateTranchedWithTimestamps = [
   contracts[SEPOLIA_CHAIN_ID].SablierLockupTranched,
   SEPOLIA_DAI,
   [

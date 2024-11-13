@@ -1,10 +1,4 @@
-import type { Address as IViemAddress } from "wagmi";
-
-declare global {
-  interface Window {
-    ethereum: any;
-  }
-}
+import type { Address as IViemAddress } from "viem";
 
 export type IAddress = IViemAddress;
 export type ISeconds<T extends number | bigint = bigint> = T;
@@ -27,6 +21,21 @@ export interface IStoreFormLinear {
   api: {
     log: (value: string) => void;
     update: (updates: Partial<IStoreFormLinear>) => void;
+    reset: () => void;
+  };
+}
+
+export interface IStoreFormLockupWithdraw {
+  logs: string[];
+  error: string | undefined;
+
+  contract: string | undefined;
+  amount: string | undefined;
+  streamId: string | undefined;
+
+  api: {
+    log: (value: string) => void;
+    update: (updates: Partial<IStoreFormLockupWithdraw>) => void;
     reset: () => void;
   };
 }
@@ -70,6 +79,37 @@ export interface IStoreFormTranched {
   api: {
     log: (value: string) => void;
     update: (updates: Partial<IStoreFormTranched>) => void;
+    reset: () => void;
+  };
+}
+
+export interface IStoreFormFlow {
+  logs: string[];
+  error: string | undefined;
+
+  ratePerSecond: string | undefined;
+  initialDeposit: string | undefined;
+  recipient: string | undefined;
+  token: string | undefined;
+  transferability: boolean;
+
+  api: {
+    log: (value: string) => void;
+    update: (updates: Partial<IStoreFormFlow>) => void;
+    reset: () => void;
+  };
+}
+
+export interface IStoreFormFlowWithdraw {
+  logs: string[];
+  error: string | undefined;
+
+  amount: string | undefined;
+  streamId: string | undefined;
+
+  api: {
+    log: (value: string) => void;
+    update: (updates: Partial<IStoreFormFlowWithdraw>) => void;
     reset: () => void;
   };
 }
@@ -163,6 +203,21 @@ export type ICreateTranchedWithTimestamps = {
   broker: { account: IAddress; fee: 0n };
   tranches: ITrancheT<number>[];
 };
+
+export type IWithdrawLockup = [streamId: bigint, to: IAddress, amount: bigint];
+
+/** --------- */
+
+export type ICreateAndDepositFlow = [
+  sender: IAddress,
+  recipient: IAddress,
+  ratePerSecond: IAmountWithDecimals,
+  asset: IAddress,
+  transferable: boolean,
+  initialDeposit: IAmountWithDecimals,
+];
+
+export type IWithdrawFlow = [streamId: bigint, to: IAddress, amount: bigint];
 
 /** --------- */
 

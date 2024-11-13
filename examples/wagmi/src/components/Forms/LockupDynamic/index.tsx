@@ -3,7 +3,7 @@ import styled from "styled-components";
 import _ from "lodash";
 import { maxUint256 } from "viem";
 import { useAccount } from "wagmi";
-import { Core, ERC20 } from "../../../models";
+import { ERC20, LockupCore } from "../../../models";
 import { Cancelability, Recipient, Segments, Token, Transferability } from "./fields";
 import useStoreForm, { prefill } from "./store";
 
@@ -20,8 +20,8 @@ const Wrapper = styled.div`
 const Divider = styled.div`
   width: 100%;
   height: 1px;
-  background-color: ${(props) => props.theme.colors.gray};
-  margin: 8px 0;
+  background-color: ${(props) => props.theme.colors.dark300};
+  margin-top: 8px;
 `;
 
 const Button = styled.button``;
@@ -62,7 +62,7 @@ const Actions = styled.div`
   & > div {
     height: 20px;
     width: 1px;
-    background-color: ${(props) => props.theme.colors.gray};
+    background-color: ${(props) => props.theme.colors.dark300};
     margin: 0px;
   }
 `;
@@ -98,7 +98,7 @@ function LockupDynamic() {
       const state = useStoreForm.getState();
       try {
         state.api.update({ error: undefined });
-        await Core.doCreateDynamic(state, state.api.log);
+        await LockupCore.doCreateDynamic(state, state.api.log);
       } catch (error) {
         state.api.update({ error: _.toString(error) });
       }

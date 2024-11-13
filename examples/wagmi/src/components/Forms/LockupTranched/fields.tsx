@@ -237,9 +237,9 @@ const Tranche = styled.div`
   justify-content: flex-start;
   padding: 16px;
   gap: 16px;
-  border: 1px solid ${(props) => props.theme.colors.gray};
-  background-color: #fcfcfc;
-  border-radius: 6px;
+  border: 1px solid ${(props) => props.theme.colors.dark300};
+  background-color: ${(props) => props.theme.colors.dark200};
+  border-radius: 4px;
 `;
 
 const Header = styled.div`
@@ -248,7 +248,6 @@ const Header = styled.div`
   justify-content: space-between;
   width: 100%;
   margin-bottom: 8px;
-  margin-top: 8px;
 
   & > p {
     color: ${(props) => props.theme.colors.orange};

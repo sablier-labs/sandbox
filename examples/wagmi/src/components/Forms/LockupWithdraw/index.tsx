@@ -1,10 +1,9 @@
 import { useCallback } from "react";
 import styled from "styled-components";
 import _ from "lodash";
-import { maxUint256 } from "viem";
 import { useAccount } from "wagmi";
-import { ERC20, LockupCore } from "../../../models";
-import { Cancelability, Recipient, Token, Tranches, Transferability } from "./fields";
+import { LockupCore } from "../../../models";
+import { Amount, Contract, Identifier } from "./fields";
 import useStoreForm, { prefill } from "./store";
 
 const Wrapper = styled.div`
@@ -67,38 +66,20 @@ const Actions = styled.div`
   }
 `;
 
-function LockupTranched() {
+function LockupWithdraw() {
   const { isConnected } = useAccount();
   const { error, logs, update } = useStoreForm((state) => ({
     error: state.error,
     logs: state.logs,
     update: state.api.update,
   }));
-  const onApprove = useCallback(async () => {
-    if (isConnected) {
-      const state = useStoreForm.getState();
-      try {
-        state.api.update({ error: undefined });
-        await ERC20.doApprove(
-          "SablierLockupTranched",
-          {
-            amount: (maxUint256 / 10n ** 18n).toString(),
-            token: state.token,
-          },
-          state.api.log,
-        );
-      } catch (error) {
-        state.api.update({ error: _.toString(error) });
-      }
-    }
-  }, [isConnected]);
 
-  const onCreate = useCallback(async () => {
+  const onWithdraw = useCallback(async () => {
     if (isConnected) {
       const state = useStoreForm.getState();
       try {
         state.api.update({ error: undefined });
-        await LockupCore.doCreateTranched(state, state.api.log);
+        await LockupCore.doWithdraw(state, state.api.log);
       } catch (error) {
         state.api.update({ error: _.toString(error) });
       }
@@ -109,28 +90,16 @@ function LockupTranched() {
     update(prefill);
   }, [update]);
 
-  const onAdd = useCallback(() => {
-    const state = useStoreForm.getState();
-    const tranches = _.clone(state.tranches);
-    update({
-      tranches: [...tranches, { amount: undefined, duration: undefined }],
-    });
-  }, [update]);
-
   return (
     <Wrapper>
-      <Cancelability />
-      <Transferability />
-      <Token />
-      <Recipient />
-      <Tranches />
+      <Contract />
+      <Identifier />
+      <Amount />
       <Divider />
       <Actions>
         <Button onClick={onPrefill}>Prefill form</Button>
-        <Button onClick={onAdd}>Add tranche</Button>
         <div />
-        <Button onClick={onApprove}>Approve token spending</Button>
-        <Button onClick={onCreate}>Create LT stream</Button>
+        <Button onClick={onWithdraw}>Withdraw</Button>
       </Actions>
       {error && <Error>{error}</Error>}
       {logs.length > 0 && (
@@ -150,4 +119,4 @@ function LockupTranched() {
   );
 }
 
-export default LockupTranched;
+export default LockupWithdraw;
