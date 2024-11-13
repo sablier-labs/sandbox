@@ -2,7 +2,8 @@
 
 # Sablier Sandbox
 
-Front-end sandbox development environments for Sablier.
+Front-end sandbox development environments for Sablier. Create streams onchain or source them for preview from indexers
+(the graph, envio).
 
 ## Background
 
@@ -43,14 +44,19 @@ We also support examples of how to **Withdraw** from a Flow stream.
 The official Sablier interface uses [wagmi](wagmi.sh/) and [viem](https://viem.sh/). Both libraries offer top-notch
 support (check the docs and their github) and integrate nicely with wallet managers like RainbowKit or AppKit.
 
-| Flow (Form)                            | Lockup Dynamic (Form)                            | Headless                                  |
-| -------------------------------------- | ------------------------------------------------ | ----------------------------------------- |
-| ![FL](./packages/assets/flow-dark.png) | ![LD](./packages/assets/lockup-dynamic-dark.png) | ![H](./packages/assets/headless-dark.png) |
+| Flow (Form)                            | Lockup (Form)                                    |
+| -------------------------------------- | ------------------------------------------------ |
+| ![FL](./packages/assets/flow-dark.png) | ![LD](./packages/assets/lockup-dynamic-dark.png) |
+
+| Headless (Form)                           | Queries                                  |
+| ----------------------------------------- | ---------------------------------------- |
+| ![H](./packages/assets/headless-dark.png) | ![Q](./packages/assets/queries-dark.png) |
 
 #### Features
 
 **↪ Single stream management through Lockup**
 
+- Preview the 10 most recent Lockup (LL, LD or LT) streams using The Graph
 - Create an LL, LD or LT stream with Durations using the UI Form
 - Create an LL, LD or LT stream with Durations in headless mode (tweak durations in code)
 - Create an LL, LD or LT stream with Timestamps in headless mode (tweak timestamps in code)
@@ -58,6 +64,7 @@ support (check the docs and their github) and integrate nicely with wallet manag
 
 **↪ Single stream management through Flow**
 
+- Preview the 10 most recent Flow streams using Envio
 - Create a Flow stream using the UI Form
 - Withdraw from a Flow stream using the UI Form
 

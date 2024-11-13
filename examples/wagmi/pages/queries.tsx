@@ -2,6 +2,7 @@ import styled from "styled-components";
 import Account from "../src/components/Account";
 import Forms from "../src/components/Forms";
 import Navigation from "../src/components/Navigation";
+import Queries from "../src/components/Queries";
 
 const Wrapper = styled.div`
   width: 100vw;
@@ -44,7 +45,7 @@ function Home() {
       <Container>
         <Navigation />
         <Account />
-        <Forms />
+        <Queries />
       </Container>
     </Wrapper>
   );
