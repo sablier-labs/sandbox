@@ -1,8 +1,8 @@
-import styled from "styled-components";
-import { useWeb3Context } from "../Web3";
 import { useCallback } from "react";
+import styled from "styled-components";
+import { SEPOLIA_CHAIN_ID, SEPOLIA_DAI } from "../../constants";
 import { ERC20 } from "../../models";
-import { SEPOLIA_DAI, SEPOLIA_CHAIN_ID } from "../../constants";
+import { useWeb3Context } from "../Web3";
 
 const Wrapper = styled.div`
   display: flex;
@@ -11,18 +11,19 @@ const Wrapper = styled.div`
   flex-direction: column;
   gap: 16px;
   padding: 16px;
+  padding-top: 24px;
   width: 100%;
   border-radius: 6px;
-  border: 1px solid ${(props) => props.theme.colors.gray};
+  border: 2px solid ${(props) => props.theme.colors.dark300};
+  background-color: ${(props) => props.theme.colors.dark050};
 `;
 
 const Divider = styled.div`
   width: 100%;
   height: 1px;
-  background-color: ${(props) => props.theme.colors.gray};
+  background-color: ${(props) => props.theme.colors.dark300};
   margin: 8px 0;
 `;
-
 const Error = styled.p`
   color: ${(props) => props.theme.colors.red};
 `;

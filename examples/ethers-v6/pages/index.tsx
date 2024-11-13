@@ -38,7 +38,7 @@ function Home() {
   return (
     <Wrapper>
       <Disclaimer>
-        <p>The Sablier V2 Sandbox is only available on Sepolia</p>
+        <p>The Sablier x Ethers Sandbox is only available on Sepolia</p>
       </Disclaimer>
       <Container>
         <Account />

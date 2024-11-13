@@ -1,5 +1,5 @@
 {
-  "name": "@sablier/v2-sandbox-ethers",
+  "name": "@sablier/sandbox-ethers",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -9,28 +9,28 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@heroicons/react": "^2.0.18",
+    "@heroicons/react": "^2.1.5",
     "@openzeppelin/contracts": "4.9.2",
-    "@sablier/v2-core": "1.1.2",
-    "@sablier/v2-periphery": "^1.1.1",
+    "@sablier/v2-core": "~1.2.0",
+    "@sablier/v2-periphery": "~1.2.0",
     "bignumber.js": "^9.1.2",
     "cross-fetch": "^4.0.0",
     "ethers": "^6.8.1",
     "lodash": "^4.17.21",
-    "next": "13.4.19",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "next": "15.0.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "styled-components": "^6.0.7",
     "styled-normalize": "^8.0.7",
-    "zustand": "^4.4.1"
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.197",
     "@types/node": "20.5.3",
-    "@types/react": "18.2.21",
-    "@types/react-dom": "18.2.7",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.19",
-    "typescript": "5.1.6"
+    "typescript": "5.6.3"
   }
 }
