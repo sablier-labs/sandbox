@@ -1,10 +1,12 @@
-import _ from "lodash";
 import { useCallback } from "react";
 import type { ChangeEvent } from "react";
+import styled from "styled-components";
+import _ from "lodash";
+import { REGEX_ADDRESS, REGEX_FLOAT, REGEX_INTEGER } from "../../../constants";
 import Input from "../../Input";
 import Select from "../../Select";
 import useFormStore from "./store";
-import { REGEX_ADDRESS, REGEX_FLOAT, REGEX_INTEGER } from "../../../constants";
+import useStoreForm from "./store";
 
 export function Cancelability() {
   const { cancelability, update } = useFormStore((state) => ({
@@ -22,7 +24,7 @@ export function Cancelability() {
 
       update({ cancelability: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -55,7 +57,7 @@ export function Transferability() {
 
       update({ transferability: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -90,7 +92,7 @@ export function Token() {
 
       update({ token: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -101,45 +103,6 @@ export function Token() {
       onChange={onChange}
       format={"text"}
       placeholder={"Address of the ERC-20 token ..."}
-    />
-  );
-}
-
-export function Amount() {
-  const { amount, update } = useFormStore((state) => ({
-    amount: state.amount,
-    update: state.api.update,
-  }));
-
-  const onChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const value = (() => {
-        const input = e.target.value;
-        if (_.isNil(input) || _.toString(input).length === 0) {
-          return "";
-        }
-        return _.toString(input);
-      })();
-
-      if (
-        value === "" ||
-        new RegExp(REGEX_FLOAT).test(value) ||
-        new RegExp(REGEX_INTEGER).test(value)
-      ) {
-        update({ amount: value });
-      }
-    },
-    [update]
-  );
-
-  return (
-    <Input
-      label={"Amount"}
-      id={"amount"}
-      value={amount}
-      onChange={onChange}
-      format={"text"}
-      placeholder={"Amount to be streamed, e.g., 100 ..."}
     />
   );
 }
@@ -171,7 +134,7 @@ export function Recipient() {
 
       update({ recipient: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -186,9 +149,9 @@ export function Recipient() {
   );
 }
 
-export function Duration() {
-  const { duration, update } = useFormStore((state) => ({
-    duration: state.duration,
+export function Amount({ index }: { index: number }) {
+  const { tranche, update } = useFormStore((state) => ({
+    tranche: _.get(state.tranches, index) || {},
     update: state.api.update,
   }));
 
@@ -202,30 +165,32 @@ export function Duration() {
         return _.toString(input);
       })();
 
-      if (value !== "" && !new RegExp(REGEX_INTEGER).test(value)) {
-        return;
-      }
+      if (value === "" || new RegExp(REGEX_FLOAT).test(value) || new RegExp(REGEX_INTEGER).test(value)) {
+        const state = useFormStore.getState();
+        const tranches = _.clone(state.tranches);
+        tranches[index].amount = value;
 
-      update({ duration: value });
+        update({ tranches });
+      }
     },
-    [update]
+    [index, update],
   );
 
   return (
     <Input
-      label={"Duration"}
-      id={"duration"}
-      value={duration}
+      label={"Tranche Amount"}
+      id={"tranche_amount"}
+      value={tranche.amount}
       onChange={onChange}
       format={"text"}
-      placeholder={"Duration in seconds, e.g., 86400 (1 Day) ..."}
+      placeholder={"Amount streamed this tranche, e.g., 100 ..."}
     />
   );
 }
 
-export function Cliff() {
-  const { cliff, update } = useFormStore((state) => ({
-    cliff: state.cliff,
+export function Duration({ index }: { index: number }) {
+  const { tranche, update } = useFormStore((state) => ({
+    tranche: _.get(state.tranches, index) || {},
     update: state.api.update,
   }));
 
@@ -243,19 +208,84 @@ export function Cliff() {
         return;
       }
 
-      update({ cliff: value });
+      const state = useFormStore.getState();
+      const tranches = _.clone(state.tranches);
+      tranches[index].duration = value;
+
+      update({ tranches });
     },
-    [update]
+    [index, update],
   );
 
   return (
     <Input
-      label={"Cliff"}
-      id={"cliff"}
-      value={cliff}
+      label={"Tranche Duration"}
+      id={"tranche_duration"}
+      value={tranche.duration}
       onChange={onChange}
       format={"text"}
-      placeholder={"Cliff in seconds, e.g., 3600 (1 Hour) ..."}
+      placeholder={"Duration of this tranche, e.g., 3600 (1 Hour) ..."}
     />
+  );
+}
+
+const Tranche = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 16px;
+  gap: 16px;
+  border: 1px solid ${(props) => props.theme.colors.dark300};
+  background-color: ${(props) => props.theme.colors.dark200};
+  border-radius: 4px;
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 8px;
+
+  & > p {
+    color: ${(props) => props.theme.colors.orange};
+  }
+`;
+const Button = styled.button``;
+
+export function Tranches() {
+  const { tranches, update } = useFormStore((state) => ({
+    tranches: state.tranches,
+    update: state.api.update,
+  }));
+
+  const onRemove = useCallback(
+    (index: number) => {
+      const state = useStoreForm.getState();
+      const tranches = _.clone(state.tranches);
+      tranches.splice(index, 1);
+      update({ tranches });
+    },
+    [update],
+  );
+
+  return (
+    <>
+      {tranches.map((_tranche, index) => (
+        <Tranche key={index}>
+          <Header>
+            <p>
+              <b>Tranche #{index + 1}</b>
+            </p>
+            {index === 0 ? false : <Button onClick={() => onRemove(index)}>Remove tranche</Button>}
+          </Header>
+
+          <Amount index={index} />
+          <Duration index={index} />
+        </Tranche>
+      ))}
+    </>
   );
 }

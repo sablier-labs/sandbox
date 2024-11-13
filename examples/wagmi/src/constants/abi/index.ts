@@ -1,13 +1,22 @@
-import { default as SablierV2LockupDynamic } from "@sablier/v2-core/artifacts/SablierV2LockupDynamic.json";
-import { default as SablierV2LockupLinear } from "@sablier/v2-core/artifacts/SablierV2LockupLinear.json";
-import { default as SablierV2Batch } from "@sablier/v2-periphery/artifacts/SablierV2Batch.json";
 import { default as ERC20 } from "./ERC20Mintable";
+import { default as SablierBatchLockup } from "./SablierBatchLockup";
+import { default as SablierFlow } from "./SablierFlow";
+import { default as SablierLockupDynamic } from "./SablierLockupDynamic";
+import { default as SablierLockupLinear } from "./SablierLockupLinear";
+import { default as SablierLockupTranched } from "./SablierLockupTranched";
+
+/**
+ * You can also source these ABIs from NPM packages: "@sablier/v2-core" and "@sablier/v2-periphery".
+ * Note: Imports from NPM packages (not local, without 'as const') will prevent viem (abitype) from resolving types from the JSON ABIs.
+ */
 
 const ABI = {
   ERC20,
-  SablierV2Batch,
-  SablierV2LockupDynamic,
-  SablierV2LockupLinear,
+  SablierBatchLockup,
+  SablierFlow,
+  SablierLockupDynamic,
+  SablierLockupLinear,
+  SablierLockupTranched,
 } as const;
 
 export default ABI;

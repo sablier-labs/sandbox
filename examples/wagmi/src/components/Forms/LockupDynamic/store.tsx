@@ -11,11 +11,11 @@ const initial: Omit<IStoreFormDynamic, "api"> = {
   recipient: undefined,
   token: undefined,
   transferability: true,
-  
+
   segments: [
     {
       amount: undefined,
-      delta: undefined,
+      duration: undefined,
       exponent: undefined,
     },
   ],
@@ -33,22 +33,22 @@ const prefill: Omit<IStoreFormDynamic, "api"> = {
   segments: [
     {
       amount: "0",
-      delta: "43199", // 12hrs - 1 second
+      duration: "43199", // 12hrs - 1 second
       exponent: "1",
     },
     {
       amount: "50",
-      delta: "1", // 1 second
+      duration: "1", // 1 second
       exponent: "1",
     },
     {
       amount: "0",
-      delta: "43199", // 12hrs - 1 second
+      duration: "43199", // 12hrs - 1 second
       exponent: "1",
     },
     {
       amount: "50",
-      delta: "1", // 1 second
+      duration: "1", // 1 second
       exponent: "1",
     },
   ],
@@ -76,7 +76,7 @@ const useStoreForm = createWithEqualityFn<IStoreFormDynamic>(
         }),
     },
   }),
-  shallow
+  shallow,
 );
 
 export { initial, prefill };

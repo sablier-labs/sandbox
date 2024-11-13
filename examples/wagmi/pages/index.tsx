@@ -15,7 +15,7 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 800px;
+  max-width: 920px;
   margin: 0 auto;
   padding: 48px;
   gap: 48px;
@@ -38,7 +38,7 @@ function Home() {
   return (
     <Wrapper>
       <Disclaimer>
-        <p>The Sablier V2 Sandbox is only available on Sepolia</p>
+        <p>The Sablier x Wagmi Sandbox is only available on Sepolia</p>
       </Disclaimer>
       <Container>
         <Account />

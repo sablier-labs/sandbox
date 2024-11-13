@@ -1,10 +1,7 @@
 import type { PropsWithChildren } from "react";
-import {
-  ThemeProvider as Provider,
-  createGlobalStyle,
-} from "styled-components";
-import { normalize } from "styled-normalize";
+import { ThemeProvider as Provider, createGlobalStyle } from "styled-components";
 import { Urbanist } from "next/font/google";
+import { normalize } from "styled-normalize";
 
 const urbanist = Urbanist({
   subsets: ["latin"],
@@ -14,6 +11,10 @@ const urbanist = Urbanist({
 const colors = {
   black: "#000000",
   dark: "#14161F",
+  dark050: "#1a1d28",
+  dark100: "#1e212f",
+  dark200: "#242838",
+  dark300: "#2a2e41",
   gray: "#E1E4EA",
   gray200: "#C3C9D5",
   gray300: "#A5AEC0",
@@ -23,6 +24,7 @@ const colors = {
   red: "#E52E52",
   blue: "#0063FF",
   orange: "#FF9C00",
+  purple: "#874FFF",
 
   transparent: "transparent",
   white: "#FFFFFF",
@@ -70,8 +72,9 @@ const GlobalStyle = createGlobalStyle<{ theme: ThemeType }>`
     min-height: 100vh;
     margin: 0rem;
     padding: 0rem;
-    color: ${(props) => props.theme.colors.dark};
-    background-color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.white};
+    background-color: ${(props) => props.theme.colors.dark200};
+
     font-family: var(--font-urbanist);
     cursor: auto;
     font-weight: 500;

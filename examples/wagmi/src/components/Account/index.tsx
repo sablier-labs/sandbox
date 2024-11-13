@@ -1,9 +1,9 @@
-import styled from "styled-components";
 import { useCallback } from "react";
+import styled from "styled-components";
+import _ from "lodash";
+import { useAccount, useConnect, useDisconnect, useWalletClient } from "wagmi";
+import { SEPOLIA_DAI } from "../../constants";
 import { ERC20 } from "../../models";
-import { useAccount, useConnect, useWalletClient } from "wagmi";
-import { SEPOLIA_DAI, SEPOLIA_CHAIN_ID } from "../../constants";
-import { InjectedConnector } from "wagmi/connectors/injected";
 
 const Wrapper = styled.div`
   display: flex;
@@ -12,15 +12,17 @@ const Wrapper = styled.div`
   flex-direction: column;
   gap: 16px;
   padding: 16px;
+  padding-top: 24px;
   width: 100%;
   border-radius: 6px;
-  border: 1px solid ${(props) => props.theme.colors.gray};
+  border: 2px solid ${(props) => props.theme.colors.dark300};
+  background-color: ${(props) => props.theme.colors.dark050};
 `;
 
 const Divider = styled.div`
   width: 100%;
   height: 1px;
-  background-color: ${(props) => props.theme.colors.gray};
+  background-color: ${(props) => props.theme.colors.dark300};
   margin: 8px 0;
 `;
 
@@ -30,9 +32,8 @@ const Error = styled.p`
 
 function Account() {
   const { address, status } = useAccount();
-  const { connect } = useConnect({
-    connector: new InjectedConnector(),
-  });
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
   const { data: walletClient, error } = useWalletClient();
 
   const onMint = useCallback(async () => {
@@ -45,13 +46,21 @@ function Account() {
     }
   }, [walletClient]);
 
+  const onDisconnect = useCallback(async () => {
+    try {
+      void disconnect({ connector: connectors[0] });
+    } catch (error) {
+      console.error(error);
+    }
+  }, [connectors, disconnect]);
+
   return (
     <Wrapper>
       <b>Account</b>
       <Divider />
       {error ? (
         <Error>
-          <b color={"red"}>Error:</b> {error?.name || error?.message}
+          <b color={"red"}>Error:</b> {error?.name || _.toString(error)}
         </Error>
       ) : (
         false
@@ -69,7 +78,7 @@ function Account() {
           <span> . . . </span>
           <button
             onClick={() => {
-              connect();
+              connect({ connector: connectors[0] });
             }}
           >
             Connect
@@ -81,7 +90,7 @@ function Account() {
       {status === "connected" ? (
         <>
           <p>
-            <b>Status:</b> Connected
+            <b>Status:</b> Connected <button onClick={onDisconnect}>Disconnect</button>
           </p>
           <p>
             <b>Address:</b> {address}
@@ -94,7 +103,6 @@ function Account() {
             <span> . . . </span>
             <button onClick={onMint}>Mint</button>
           </p>
-         
         </>
       ) : (
         false

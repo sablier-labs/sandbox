@@ -1,12 +1,12 @@
-import _ from "lodash";
 import { useCallback } from "react";
 import type { ChangeEvent } from "react";
+import styled from "styled-components";
+import _ from "lodash";
+import { REGEX_ADDRESS, REGEX_FLOAT, REGEX_INTEGER } from "../../../constants";
 import Input from "../../Input";
 import Select from "../../Select";
 import useFormStore from "./store";
-import styled from "styled-components";
 import useStoreForm from "./store";
-import { REGEX_ADDRESS, REGEX_FLOAT, REGEX_INTEGER } from "../../../constants";
 
 export function Cancelability() {
   const { cancelability, update } = useFormStore((state) => ({
@@ -24,7 +24,7 @@ export function Cancelability() {
 
       update({ cancelability: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -57,7 +57,7 @@ export function Transferability() {
 
       update({ transferability: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -92,7 +92,7 @@ export function Token() {
 
       update({ token: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -134,7 +134,7 @@ export function Recipient() {
 
       update({ recipient: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -165,11 +165,7 @@ export function Amount({ index }: { index: number }) {
         return _.toString(input);
       })();
 
-      if (
-        value === "" ||
-        new RegExp(REGEX_FLOAT).test(value) ||
-        new RegExp(REGEX_INTEGER).test(value)
-      ) {
+      if (value === "" || new RegExp(REGEX_FLOAT).test(value) || new RegExp(REGEX_INTEGER).test(value)) {
         const state = useFormStore.getState();
         const segments = _.clone(state.segments);
         segments[index].amount = value;
@@ -177,7 +173,7 @@ export function Amount({ index }: { index: number }) {
         update({ segments });
       }
     },
-    [index, update]
+    [index, update],
   );
 
   return (
@@ -214,18 +210,18 @@ export function Delta({ index }: { index: number }) {
 
       const state = useFormStore.getState();
       const segments = _.clone(state.segments);
-      segments[index].delta = value;
+      segments[index].duration = value;
 
       update({ segments });
     },
-    [index, update]
+    [index, update],
   );
 
   return (
     <Input
       label={"Segment Delta"}
       id={"segment_delta"}
-      value={segment.delta}
+      value={segment.duration}
       onChange={onChange}
       format={"text"}
       placeholder={"Duration of this segment, e.g., 3600 (1 Hour) ..."}
@@ -259,7 +255,7 @@ export function Exponent({ index }: { index: number }) {
 
       update({ segments });
     },
-    [index, update]
+    [index, update],
   );
 
   return (
@@ -282,9 +278,9 @@ const Segment = styled.div`
   justify-content: flex-start;
   padding: 16px;
   gap: 16px;
-  border: 1px solid ${(props) => props.theme.colors.gray};
-  background-color: #fcfcfc;
-  border-radius: 6px;
+  border: 1px solid ${(props) => props.theme.colors.dark300};
+  background-color: ${(props) => props.theme.colors.dark200};
+  border-radius: 4px;
 `;
 
 const Header = styled.div`
@@ -293,8 +289,6 @@ const Header = styled.div`
   justify-content: space-between;
   width: 100%;
   margin-bottom: 8px;
-  margin-top: 8px;
-
   & > p {
     color: ${(props) => props.theme.colors.orange};
   }
@@ -314,7 +308,7 @@ export function Segments() {
       segments.splice(index, 1);
       update({ segments });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -325,11 +319,7 @@ export function Segments() {
             <p>
               <b>Segment #{index + 1}</b>
             </p>
-            {index === 0 ? (
-              false
-            ) : (
-              <Button onClick={() => onRemove(index)}>Remove segment</Button>
-            )}
+            {index === 0 ? false : <Button onClick={() => onRemove(index)}>Remove segment</Button>}
           </Header>
 
           <Amount index={index} />

@@ -1,35 +1,27 @@
 import { shallow } from "zustand/shallow";
 import { createWithEqualityFn } from "zustand/traditional";
-import { SEPOLIA_DAI } from "../../../constants";
-import type { IStoreFormLinear } from "../../../types";
+import { SEPOLIA_CHAIN_ID, contracts } from "../../../constants";
+import type { IStoreFormLockupWithdraw } from "../../../types";
 
-const initial: Omit<IStoreFormLinear, "api"> = {
+const initial: Omit<IStoreFormLockupWithdraw, "api"> = {
   error: undefined,
   logs: [],
 
   amount: undefined,
-  cancelability: true,
-  cliff: undefined,
-  duration: undefined,
-  recipient: undefined,
-  token: undefined,
-  transferability: true
+  contract: contracts[SEPOLIA_CHAIN_ID].SablierLockupLinear,
+  streamId: undefined,
 };
 
-const prefill: Omit<IStoreFormLinear, "api"> = {
+const prefill: Omit<IStoreFormLockupWithdraw, "api"> = {
   error: undefined,
   logs: [],
 
   amount: "100",
-  cancelability: true,
-  cliff: undefined,
-  duration: "86400", // 1 day
-  recipient: "0xCAFE000000000000000000000000000000000000",
-  token: SEPOLIA_DAI,
-  transferability: true
+  contract: contracts[SEPOLIA_CHAIN_ID].SablierLockupLinear,
+  streamId: "898",
 };
 
-const useStoreForm = createWithEqualityFn<IStoreFormLinear>(
+const useStoreForm = createWithEqualityFn<IStoreFormLockupWithdraw>(
   (set) => ({
     ...initial,
     api: {
@@ -39,7 +31,7 @@ const useStoreForm = createWithEqualityFn<IStoreFormLinear>(
             logs: [...prev.logs, value],
           };
         }),
-      update: (updates: Partial<IStoreFormLinear>) =>
+      update: (updates: Partial<IStoreFormLockupWithdraw>) =>
         set((_prev) => {
           return {
             ...updates,
@@ -51,7 +43,7 @@ const useStoreForm = createWithEqualityFn<IStoreFormLinear>(
         }),
     },
   }),
-  shallow
+  shallow,
 );
 
 export { initial, prefill };

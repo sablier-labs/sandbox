@@ -1,10 +1,10 @@
 import { PropsWithChildren } from "react";
-import "cross-fetch";
-import { ThemeProvider } from "../src/components/Theme";
-import { AppProps } from "next/app";
-import Web3Provider from "../src/components/Web3";
-import Head from "next/head";
 import BigNumber from "bignumber.js";
+import "cross-fetch";
+import { AppProps } from "next/app";
+import Head from "next/head";
+import { ThemeProvider } from "../src/components/Theme";
+import Web3Provider from "../src/components/Web3";
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_FLOOR });
 BigNumber.config({ EXPONENTIAL_AT: 1e9 });
@@ -21,7 +21,7 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <Wrapper>
       <Head>
-        <title>Sablier V2 Sandbox | Wagmi</title>
+        <title>Sablier Sandbox | Wagmi</title>
       </Head>
       <Component {...pageProps} />
     </Wrapper>

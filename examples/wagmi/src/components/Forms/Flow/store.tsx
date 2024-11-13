@@ -1,60 +1,31 @@
 import { shallow } from "zustand/shallow";
 import { createWithEqualityFn } from "zustand/traditional";
 import { SEPOLIA_DAI } from "../../../constants";
-import type { IStoreFormDynamic } from "../../../types";
+import type { IStoreFormFlow, IStoreFormLinear } from "../../../types";
 
-
-const initial: Omit<IStoreFormDynamic, "api"> = {
+const initial: Omit<IStoreFormFlow, "api"> = {
   error: undefined,
   logs: [],
 
-  cancelability: true,
+  ratePerSecond: undefined,
+  initialDeposit: undefined,
   recipient: undefined,
-  segments: [
-    {
-      amount: undefined,
-      delta: undefined,
-      exponent: undefined,
-    },
-  ],
   token: undefined,
   transferability: true,
 };
 
-const prefill: Omit<IStoreFormDynamic, "api"> = {
+const prefill: Omit<IStoreFormFlow, "api"> = {
   error: undefined,
   logs: [],
 
-  cancelability: true,
+  initialDeposit: "100",
+  ratePerSecond: "0.00006",
   recipient: "0xCAFE000000000000000000000000000000000000",
   token: SEPOLIA_DAI,
   transferability: true,
-  
-  segments: [
-    {
-      amount: "0",
-      delta: "43199", // 12hrs - 1 second
-      exponent: "1",
-    },
-    {
-      amount: "50",
-      delta: "1", // 1 second
-      exponent: "1",
-    },
-    {
-      amount: "0",
-      delta: "43199", // 12hrs - 1 second
-      exponent: "1",
-    },
-    {
-      amount: "50",
-      delta: "1", // 1 second
-      exponent: "1",
-    },
-  ],
 };
 
-const useStoreForm = createWithEqualityFn<IStoreFormDynamic>(
+const useStoreForm = createWithEqualityFn<IStoreFormFlow>(
   (set) => ({
     ...initial,
     api: {
@@ -64,7 +35,7 @@ const useStoreForm = createWithEqualityFn<IStoreFormDynamic>(
             logs: [...prev.logs, value],
           };
         }),
-      update: (updates: Partial<IStoreFormDynamic>) =>
+      update: (updates: Partial<IStoreFormFlow>) =>
         set((_prev) => {
           return {
             ...updates,
@@ -76,7 +47,7 @@ const useStoreForm = createWithEqualityFn<IStoreFormDynamic>(
         }),
     },
   }),
-  shallow
+  shallow,
 );
 
 export { initial, prefill };
