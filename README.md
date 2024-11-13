@@ -43,9 +43,9 @@ We also support examples of how to **Withdraw** from a Flow stream.
 The official Sablier interface uses [wagmi](wagmi.sh/) and [viem](https://viem.sh/). Both libraries offer top-notch
 support (check the docs and their github) and integrate nicely with wallet managers like RainbowKit or AppKit.
 
-| Flow (Form)                       | Lockup Dynamic (Form)                       | Headless                             |
-| --------------------------------- | ------------------------------------------- | ------------------------------------ |
-| ![FL](./packages/assets/flow.png) | ![LD](./packages/assets/lockup-dynamic.png) | ![H](./packages/assets/headless.png) |
+| Flow (Form)                            | Lockup Dynamic (Form)                            | Headless                                  |
+| -------------------------------------- | ------------------------------------------------ | ----------------------------------------- |
+| ![FL](./packages/assets/flow-dark.png) | ![LD](./packages/assets/lockup-dynamic-dark.png) | ![H](./packages/assets/headless-dark.png) |
 
 #### Features
 
