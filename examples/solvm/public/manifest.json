@@ -1,0 +1,17 @@
+{
+  "background_color": "#f8faff",
+  "description": "Sablier Sandbox",
+  "display": "standalone",
+  "iconPath": "icon.png",
+  "icons": [
+    {
+      "sizes": "180x180",
+      "src": "icon.png",
+      "type": "image/png"
+    }
+  ],
+  "name": "Sablier Sandbox",
+  "short_name": "Sablier",
+  "start_url": ".",
+  "theme_color": "#f77423"
+}

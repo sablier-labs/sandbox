@@ -1,0 +1,1 @@
+export const DEVNET_CHAIN_ID = 900000020;
