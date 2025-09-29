@@ -1,9 +1,6 @@
-import { useState } from "react";
 import styled from "styled-components";
-import { useAccount } from "wagmi";
-import Flow from "./Flow";
-import Lockup from "./Lockup";
 import { useWallet } from "@solana/wallet-adapter-react";
+import Lockup from "./Lockup";
 
 const Wrapper = styled.div`
   display: flex;
@@ -73,7 +70,6 @@ const Tabs = styled.div`
 `;
 
 function Queries() {
-  const [feature, setFeature] = useState(0);
   const { connected } = useWallet();
 
   if (!connected) {
@@ -82,26 +78,7 @@ function Queries() {
 
   return (
     <Wrapper>
-      <Tabs data-purpose={"feature"}>
-        <Tab
-          data-active={feature === 0}
-          onClick={() => {
-            setFeature(0);
-          }}
-        >
-          <p>Lockup (The Graph)</p>
-        </Tab>
-        <Tab
-          data-active={feature === 1}
-          onClick={() => {
-            setFeature(1);
-          }}
-        >
-          <p>Flow (Envio)</p>
-        </Tab>
-      </Tabs>
-      {feature === 0 && <Lockup />}
-      {feature === 1 && <Flow />}
+      <Lockup />
     </Wrapper>
   );
 }

@@ -14,7 +14,6 @@ export interface IStoreFormLinear {
   duration: string | undefined;
   recipient: string | undefined;
   token: string | undefined;
-  transferability: boolean;
 
   api: {
     log: (value: string) => void;

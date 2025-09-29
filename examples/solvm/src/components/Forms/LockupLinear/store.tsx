@@ -1,6 +1,6 @@
 import { shallow } from "zustand/shallow";
 import { createWithEqualityFn } from "zustand/traditional";
-import { SEPOLIA_DAI } from "../../../constants";
+import { USDC_DEVNET } from "../../../constants";
 import type { IStoreFormLinear } from "../../../types";
 
 const initial: Omit<IStoreFormLinear, "api"> = {
@@ -13,20 +13,18 @@ const initial: Omit<IStoreFormLinear, "api"> = {
   duration: undefined,
   recipient: undefined,
   token: undefined,
-  transferability: true
 };
 
 const prefill: Omit<IStoreFormLinear, "api"> = {
   error: undefined,
   logs: [],
 
-  amount: "100",
+  amount: "1",
   cancelability: true,
   cliff: undefined,
   duration: "86400", // 1 day
-  recipient: "0xCAFE000000000000000000000000000000000000",
-  token: SEPOLIA_DAI,
-  transferability: true,
+  recipient: "GmDP1fjp1sTGfqPz4Vf22E2tXYgdwarnqRwrcVzFhF76",
+  token: USDC_DEVNET,
 };
 
 const useStoreForm = createWithEqualityFn<IStoreFormLinear>(
@@ -51,7 +49,7 @@ const useStoreForm = createWithEqualityFn<IStoreFormLinear>(
         }),
     },
   }),
-  shallow
+  shallow,
 );
 
 export { initial, prefill };

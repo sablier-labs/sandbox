@@ -34,6 +34,7 @@
     "react-dom": "18.3.1",
     "styled-components": "^6.0.7",
     "styled-normalize": "^8.0.7",
+    "uuid": "^13.0.0",
     "viem": "~2.21.44",
     "wagmi": "~2.12.19",
     "zustand": "^5.0.1"

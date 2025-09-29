@@ -1,11 +1,12 @@
 import { useCallback } from "react";
 import styled from "styled-components";
+import { useWallet } from "@solana/wallet-adapter-react";
 import _ from "lodash";
 import { useAccount } from "wagmi";
-import { ERC20, LockupCore } from "../../../models";
-import { Amount, Cancelability, Cliff, Duration, Recipient, Token, Transferability } from "./fields";
+import { LockupCore } from "../../../models";
+import { Amount, Cancelability, Cliff, Duration, Recipient, Token } from "./fields";
 import useStoreForm, { prefill } from "./store";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useTransactionSigner } from "../../../contexts";
 
 const Wrapper = styled.div`
   display: flex;
@@ -68,35 +69,24 @@ const Actions = styled.div`
 `;
 
 function LockupLinear() {
-  const { connected } = useWallet();
+  const signer = useTransactionSigner();
   const { error, logs, update } = useStoreForm((state) => ({
     error: state.error,
     logs: state.logs,
     update: state.api.update,
   }));
-  const onApprove = useCallback(async () => {
-    if (connected) {
-      const state = useStoreForm.getState();
-      try {
-        state.api.update({ error: undefined });
-        await ERC20.doApprove("SablierLockupLinear", state, state.api.log);
-      } catch (error) {
-        state.api.update({ error: _.toString(error) });
-      }
-    }
-  }, [connected]);
 
   const onCreate = useCallback(async () => {
-    if (connected) {
+    if (signer) {
       const state = useStoreForm.getState();
       try {
         state.api.update({ error: undefined });
-        await LockupCore.doCreateLinear(state, state.api.log);
+        await LockupCore.doCreateLinear(state, signer, state.api.log);
       } catch (error) {
         state.api.update({ error: _.toString(error) });
       }
     }
-  }, [connected]);
+  }, [signer]);
 
   const onPrefill = useCallback(() => {
     update(prefill);
@@ -105,7 +95,6 @@ function LockupLinear() {
   return (
     <Wrapper>
       <Cancelability />
-      <Transferability />
       <Token />
       <Amount />
       <Recipient />
@@ -115,7 +104,6 @@ function LockupLinear() {
       <Actions>
         <Button onClick={onPrefill}>Prefill form</Button>
         <div />
-        <Button onClick={onApprove}>Approve token spending</Button>
         <Button onClick={onCreate}>Create LL stream</Button>
       </Actions>
       {error && <Error>{error}</Error>}

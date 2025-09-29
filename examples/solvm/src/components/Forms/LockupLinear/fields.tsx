@@ -39,38 +39,6 @@ export function Cancelability() {
   );
 }
 
-export function Transferability() {
-  const { transferability, update } = useFormStore((state) => ({
-    transferability: state.transferability,
-    update: state.api.update,
-  }));
-
-  const onChange = useCallback(
-    (e: ChangeEvent<HTMLSelectElement>) => {
-      const value = (() => {
-        const input = e.target.value;
-
-        return ["true", true].includes(input);
-      })();
-
-      update({ transferability: value });
-    },
-    [update]
-  );
-
-  return (
-    <Select
-      label={"Transferability"}
-      id={"transferability"}
-      value={_.toString(transferability)}
-      source={[
-        { label: "On (Can be transferred later)", value: "true" },
-        { label: "Off (Can never be transferred)", value: "false" },
-      ]}
-      onChange={onChange}
-    />
-  );
-}
 
 export function Token() {
   const { token, update } = useFormStore((state) => ({
@@ -100,7 +68,7 @@ export function Token() {
       value={token}
       onChange={onChange}
       format={"text"}
-      placeholder={"Address of the ERC-20 token ..."}
+      placeholder={"Address of the Mint ..."}
     />
   );
 }

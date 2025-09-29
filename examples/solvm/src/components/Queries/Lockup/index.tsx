@@ -42,9 +42,9 @@ const getStreams = gql/* GraphQL */ `
   query getStreams {
     streams(first: 10, orderBy: subgraphId, orderDirection: desc) {
       id
-      tokenId
       subgraphId
       chainId
+      chainCode
       alias
       category
       funder
@@ -55,33 +55,37 @@ const getStreams = gql/* GraphQL */ `
       depositAmount
       startTime
       endTime
+      duration
       cliff
       cliffTime
       cliffAmount
+      initial
+      initialAmount
       cancelable
       renounceTime
       canceled
       canceledTime
       withdrawnAmount
-      transferable
+      intactAmount
+      version
+
+      salt
+      nftData
+      nftMint
+
       asset {
         id
-        symbol
+        address
+        chainId
+        chainCode
+        decimals
+        program
       }
       contract {
+        id
         address
-      }
-      segments {
-        amount
-        exponent
-        startTime
-        endTime
-      }
-      tranches {
-        amount
-        timestamp
-        startTime
-        endTime
+        category
+        version
       }
     }
   }

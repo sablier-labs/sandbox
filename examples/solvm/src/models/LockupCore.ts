@@ -1,25 +1,51 @@
+import { TOKEN_PROGRAM_ADDRESS, fetchMint, findAssociatedTokenPda } from "@solana-program/token";
+import {
+  TransactionSigner,
+  address,
+  appendTransactionMessageInstructions,
+  assertIsTransactionWithinSizeLimit,
+  createSolanaRpc,
+  createSolanaRpcSubscriptions,
+  createTransactionMessage,
+  pipe,
+  sendAndConfirmTransactionFactory,
+  setTransactionMessageFeePayerSigner,
+  setTransactionMessageLifetimeUsingBlockhash,
+  signTransactionMessageWithSigners,
+} from "@solana/kit";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import BigNumber from "bignumber.js";
+import { sign } from "crypto";
 import _ from "lodash";
+import { parse as uuidParse, v4 as uuidV4 } from "uuid";
 import { zeroAddress } from "viem";
 import { getAccount, readContract, readContracts, waitForTransactionReceipt, writeContract } from "wagmi/actions";
-import { config } from "../components/Web3";
-import { ABI, DEVNET_CHAIN_ID, contracts } from "../constants";
+import { DEVNET_CHAIN_ID, contracts } from "../constants";
+import { getCreateWithDurationsLlInstructionAsync } from "../generated/linear/instructions";
 import type {
   IAddress,
   IAmountWithDecimals,
   IAmountWithDecimals18,
-  ICreateDynamicWithDurations,
-  ICreateDynamicWithTimestamps,
   ICreateLinearWithDurations,
   ICreateLinearWithTimestamps,
-  ICreateTranchedWithDurations,
-  ICreateTranchedWithTimestamps,
   ISeconds,
   ISegmentD,
-  ITrancheD,
   IWithdrawLockup,
 } from "../types";
 import { erroneous, expect } from "../utils";
+
+function doGenerateSalt() {
+  const uuid = uuidV4();
+  const bytes = uuidParse(uuid);
+
+  const hex =
+    "0x" +
+    Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+  return new BigNumber(hex);
+}
 
 class LockupCore {
   static async doCreateLinear(
@@ -30,8 +56,8 @@ class LockupCore {
       duration: string | undefined;
       recipient: string | undefined;
       token: string | undefined;
-      transferability: boolean;
     },
+    signer: TransactionSigner,
     log: (value: string) => void,
   ) {
     try {
@@ -40,24 +66,22 @@ class LockupCore {
         !expect(state.cancelability, "cancelability") ||
         !expect(state.duration, "duration") ||
         !expect(state.recipient, "recipient") ||
-        !expect(state.token, "token") ||
-        !expect(state.transferability, "transferability")
+        !expect(state.token, "token")
       ) {
         return;
       }
 
-      const decimals = await readContract(config, {
-        address: state.token as IAddress,
-        abi: ABI.ERC20.abi,
-        functionName: "decimals",
-      });
+      const mint = address(state.token);
+      const rpc = createSolanaRpc("https://api.devnet.solana.com");
+      const rpcSubscriptions = createSolanaRpcSubscriptions("wss://api.devnet.solana.com");
+      const mintInfo = await fetchMint(rpc, mint);
+      const decimals = mintInfo.data.decimals;
 
       /** We use BigNumber to convert float values to decimal padded BigInts */
       const padding = new BigNumber(10).pow(new BigNumber(decimals.toString()));
       const amount = BigInt(new BigNumber(state.amount).times(padding).toFixed());
 
-      const sender = await getAccount(config).address;
-      if (!expect(sender, "sender")) {
+      if (!expect(signer, "signer")) {
         return;
       }
 
@@ -70,222 +94,55 @@ class LockupCore {
         return 0;
       })();
 
-      const payload: ICreateLinearWithDurations = {
-        sender,
-        recipient: state.recipient as IAddress,
-        totalAmount: amount,
-        asset: state.token as IAddress,
-        cancelable: state.cancelability,
-        transferable: state.transferability,
-        durations: { cliff, total: _.toNumber(state.duration) },
-        broker: { account: zeroAddress, fee: 0n },
-      };
+      const salt = doGenerateSalt().toNumber();
 
-      console.info("Payload", payload);
-
-      const hash = await writeContract(config, {
-        address: contracts[DEVNET_CHAIN_ID].SablierLockupLinear,
-        abi: ABI.SablierLockupLinear.abi,
-        functionName: "createWithDurations",
-        args: [payload],
+      const [associatedTokenAddress] = await findAssociatedTokenPda({
+        mint,
+        owner: signer.address,
+        tokenProgram: TOKEN_PROGRAM_ADDRESS,
       });
 
-      if (hash) {
-        log(`LL Stream sent to the blockchain with hash: ${hash}.`);
-      }
+      const createWithDurationLl = await getCreateWithDurationsLlInstructionAsync({
+        creator: signer,
+        sender: signer.address,
+        recipient: address(state.recipient),
+        depositTokenMint: mint,
+        nftTokenProgram: address(TOKEN_PROGRAM_ID.toString()),
+        creatorAta: associatedTokenAddress,
+        depositTokenProgram: mintInfo.programAddress,
+        salt,
+        depositAmount: amount,
+        cliffDuration: cliff,
+        totalDuration: _.toNumber(state.duration),
+        startUnlockAmount: 0,
+        cliffUnlockAmount: 0,
+        isCancelable: state.cancelability,
+      });
 
-      const receipt = await waitForTransactionReceipt(config, { hash });
+      const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-      if (receipt?.status === "success") {
-        log(`LL Stream successfully created.`);
-      } else {
-        log(`LL Stream creation failed.`);
-      }
+      console.info("Latest blockhash", latestBlockhash);
+
+      const transactionMessage = pipe(
+        createTransactionMessage({ version: 0 }),
+        (tx) => setTransactionMessageFeePayerSigner(signer, tx),
+        (tx) =>
+          setTransactionMessageLifetimeUsingBlockhash(
+            { lastValidBlockHeight: latestBlockhash.lastValidBlockHeight, blockhash: latestBlockhash.blockhash },
+            tx,
+          ),
+        (tx) => appendTransactionMessageInstructions([createWithDurationLl], tx),
+      );
+
+      const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
+      assertIsTransactionWithinSizeLimit(signedTransaction);
+      await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(signedTransaction, {
+        commitment: "confirmed",
+        skipPreflight: true,
+      });
+      console.info("LL Stream successfully created.");
     } catch (error) {
-      erroneous(error);
-    }
-  }
-
-  static async doCreateDynamic(
-    state: {
-      cancelability: boolean;
-      recipient: string | undefined;
-      segments: {
-        amount: string | undefined;
-        duration: string | undefined;
-        exponent: string | undefined;
-      }[];
-      token: string | undefined;
-      transferability: boolean;
-    },
-    log: (value: string) => void,
-  ) {
-    try {
-      if (
-        !expect(state.segments, "segments") ||
-        !expect(state.cancelability, "cancelability") ||
-        !expect(state.recipient, "recipient") ||
-        !expect(state.token, "token") ||
-        !expect(state.transferability, "transferability")
-      ) {
-        return;
-      }
-
-      const decimals = await readContract(config, {
-        address: state.token as IAddress,
-        abi: ABI.ERC20.abi,
-        functionName: "decimals",
-      });
-
-      /** We use BigNumber to convert float values to decimal padded BigInts */
-      const padding = new BigNumber(10).pow(new BigNumber(decimals.toString()));
-
-      const sender = await getAccount(config).address;
-      if (!expect(sender, "sender")) {
-        return;
-      }
-
-      const segments: ISegmentD<number>[] = state.segments.map((segment) => {
-        if (
-          !expect(segment.amount, "segment amount") ||
-          !expect(segment.duration, "segment duration") ||
-          !expect(segment.exponent, "segment exponent")
-        ) {
-          throw new Error("Expected valid segments.");
-        }
-
-        const amount: IAmountWithDecimals = BigInt(new BigNumber(segment.amount).times(padding).toFixed());
-        const duration: ISeconds<number> = _.toNumber(segment.duration);
-        const exponent: IAmountWithDecimals18 = BigInt(segment.exponent) * 10n ** 18n;
-
-        const result: ISegmentD<number> = { amount, exponent, duration };
-
-        return result;
-      });
-
-      const amount = segments.reduce((prev, curr) => prev + (curr?.amount || 0n), 0n);
-
-      const payload: ICreateDynamicWithDurations = {
-        sender,
-        cancelable: state.cancelability,
-        transferable: state.transferability,
-        recipient: state.recipient as IAddress,
-        totalAmount: amount,
-        asset: state.token as IAddress,
-        broker: { account: zeroAddress, fee: 0n },
-        segments,
-      };
-
-      console.info("Payload", payload);
-
-      const hash = await writeContract(config, {
-        address: contracts[DEVNET_CHAIN_ID].SablierLockupDynamic,
-        abi: ABI.SablierLockupDynamic.abi,
-        functionName: "createWithDurations",
-        args: [payload],
-      });
-
-      if (hash) {
-        log(`LD Stream sent to the blockchain with hash: ${hash}.`);
-      }
-
-      const receipt = await waitForTransactionReceipt(config, { hash });
-
-      if (receipt?.status === "success") {
-        log(`LD Stream successfully created.`);
-      } else {
-        log(`LD Stream creation failed.`);
-      }
-    } catch (error) {
-      erroneous(error);
-    }
-  }
-
-  static async doCreateTranched(
-    state: {
-      cancelability: boolean;
-      recipient: string | undefined;
-      tranches: {
-        amount: string | undefined;
-        duration: string | undefined;
-      }[];
-      token: string | undefined;
-      transferability: boolean;
-    },
-    log: (value: string) => void,
-  ) {
-    try {
-      if (
-        !expect(state.tranches, "tranches") ||
-        !expect(state.cancelability, "cancelability") ||
-        !expect(state.recipient, "recipient") ||
-        !expect(state.token, "token") ||
-        !expect(state.transferability, "transferability")
-      ) {
-        return;
-      }
-
-      const decimals = await readContract(config, {
-        address: state.token as IAddress,
-        abi: ABI.ERC20.abi,
-        functionName: "decimals",
-      });
-
-      /** We use BigNumber to convert float values to decimal padded BigInts */
-      const padding = new BigNumber(10).pow(new BigNumber(decimals.toString()));
-
-      const sender = await getAccount(config).address;
-      if (!expect(sender, "sender")) {
-        return;
-      }
-
-      const tranches: ITrancheD<number>[] = state.tranches.map((tranche) => {
-        if (!expect(tranche.amount, "tranche amount") || !expect(tranche.duration, "tranche duration")) {
-          throw new Error("Expected valid tranches.");
-        }
-
-        const amount: IAmountWithDecimals = BigInt(new BigNumber(tranche.amount).times(padding).toFixed());
-        const duration: ISeconds<number> = _.toNumber(tranche.duration);
-
-        const result: ITrancheD<number> = { amount, duration };
-
-        return result;
-      });
-
-      const amount = tranches.reduce((prev, curr) => prev + (curr?.amount || 0n), 0n);
-
-      const payload: ICreateTranchedWithDurations = {
-        sender,
-        cancelable: state.cancelability,
-        transferable: state.transferability,
-        recipient: state.recipient as IAddress,
-        totalAmount: amount,
-        asset: state.token as IAddress,
-        broker: { account: zeroAddress, fee: 0n },
-        tranches,
-      };
-
-      console.info("Payload", payload);
-
-      const hash = await writeContract(config, {
-        address: contracts[DEVNET_CHAIN_ID].SablierLockupTranched,
-        abi: ABI.SablierLockupTranched.abi,
-        functionName: "createWithDurations",
-        args: [payload],
-      });
-
-      if (hash) {
-        log(`LT Stream sent to the blockchain with hash: ${hash}.`);
-      }
-
-      const receipt = await waitForTransactionReceipt(config, { hash });
-
-      if (receipt?.status === "success") {
-        log(`LT Stream successfully created.`);
-      } else {
-        log(`LT Stream creation failed.`);
-      }
-    } catch (error) {
+      console.error("LL Stream creation failed.", error);
       erroneous(error);
     }
   }
@@ -326,90 +183,6 @@ class LockupCore {
     const hash = await writeContract(config, {
       address: contracts[DEVNET_CHAIN_ID].SablierLockupLinear,
       abi: ABI.SablierLockupLinear.abi,
-      functionName: "createWithTimestamps",
-      args: [data],
-    });
-    return waitForTransactionReceipt(config, { hash });
-  }
-
-  static async doCreateDynamicWithDurationsRaw(payload: ICreateDynamicWithDurations) {
-    const data = _.clone(payload);
-    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
-      const sender = await getAccount(config).address;
-      if (!expect(sender, "sender")) {
-        return;
-      }
-      data.sender = sender;
-    }
-
-    console.info("Payload", data);
-
-    const hash = await writeContract(config, {
-      address: contracts[DEVNET_CHAIN_ID].SablierLockupDynamic,
-      abi: ABI.SablierLockupDynamic.abi,
-      functionName: "createWithDurations",
-      args: [data],
-    });
-    return waitForTransactionReceipt(config, { hash });
-  }
-
-  static async doCreateDynamicWithTimestampsRaw(payload: ICreateDynamicWithTimestamps) {
-    const data = _.clone(payload);
-    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
-      const sender = await getAccount(config).address;
-      if (!expect(sender, "sender")) {
-        return;
-      }
-      data.sender = sender;
-    }
-
-    console.info("Payload", data);
-
-    const hash = await writeContract(config, {
-      address: contracts[DEVNET_CHAIN_ID].SablierLockupDynamic,
-      abi: ABI.SablierLockupDynamic.abi,
-      functionName: "createWithTimestamps",
-      args: [data],
-    });
-    return waitForTransactionReceipt(config, { hash });
-  }
-
-  static async doCreateTranchedWithDurationsRaw(payload: ICreateTranchedWithDurations) {
-    const data = _.clone(payload);
-    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
-      const sender = await getAccount(config).address;
-      if (!expect(sender, "sender")) {
-        return;
-      }
-      data.sender = sender;
-    }
-
-    console.info("Payload", data);
-
-    const hash = await writeContract(config, {
-      address: contracts[DEVNET_CHAIN_ID].SablierLockupTranched,
-      abi: ABI.SablierLockupTranched.abi,
-      functionName: "createWithDurations",
-      args: [data],
-    });
-    return waitForTransactionReceipt(config, { hash });
-  }
-
-  static async doCreateTranchedWithTimestampsRaw(payload: ICreateTranchedWithTimestamps) {
-    const data = _.clone(payload);
-    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
-      const sender = await getAccount(config).address;
-      if (!expect(sender, "sender")) {
-        return;
-      }
-      data.sender = sender;
-    }
-
-    console.info("Payload", data);
-
-    const hash = await writeContract(config, {
-      address: contracts[DEVNET_CHAIN_ID].SablierLockupTranched,
-      abi: ABI.SablierLockupTranched.abi,
       functionName: "createWithTimestamps",
       args: [data],
     });

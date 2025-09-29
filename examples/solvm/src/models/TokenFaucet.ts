@@ -19,7 +19,6 @@ import {
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
   signTransactionMessageWithSigners,
-  unwrapOption,
 } from "@solana/kit";
 import BigNumber from "bignumber.js";
 import _ from "lodash";
@@ -47,9 +46,6 @@ class TokenFaucet {
       const rpcSubscriptions = createSolanaRpcSubscriptions("wss://api.devnet.solana.com");
       const mintInfo = await fetchMint(rpc, mint);
       const decimals = mintInfo.data.decimals;
-      const mintAuthority = unwrapOption(mintInfo.data.mintAuthority);
-
-      console.log("mintInfo.programAddress: ", mintAuthority);
 
       const symbol = "USDCD";
       const padding = new BigNumber(10).pow(new BigNumber(decimals.toString()));
