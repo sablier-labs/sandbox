@@ -1,11 +1,10 @@
 import { useCallback } from "react";
 import styled from "styled-components";
 import _ from "lodash";
-import { useAccount } from "wagmi";
 import { LockupCore } from "../../../models";
-import { Amount, Contract, Identifier } from "./fields";
+import { Amount, Identifier } from "./fields";
 import useStoreForm, { prefill } from "./store";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useTransactionSigner } from "../../../contexts";
 
 const Wrapper = styled.div`
   display: flex;
@@ -68,7 +67,8 @@ const Actions = styled.div`
 `;
 
 function LockupWithdraw() {
-  const { connected } = useWallet();
+  const signer = useTransactionSigner();
+
   const { error, logs, update } = useStoreForm((state) => ({
     error: state.error,
     logs: state.logs,
@@ -76,16 +76,16 @@ function LockupWithdraw() {
   }));
 
   const onWithdraw = useCallback(async () => {
-    if (connected) {
+    if (signer) {
       const state = useStoreForm.getState();
       try {
         state.api.update({ error: undefined });
-        await LockupCore.doWithdraw(state, state.api.log);
+        await LockupCore.doWithdraw(state, signer, state.api.log);
       } catch (error) {
         state.api.update({ error: _.toString(error) });
       }
     }
-  }, [connected]);
+  }, [signer]);
 
   const onPrefill = useCallback(() => {
     update(prefill);
@@ -93,7 +93,6 @@ function LockupWithdraw() {
 
   return (
     <Wrapper>
-      <Contract />
       <Identifier />
       <Amount />
       <Divider />

@@ -1,12 +1,26 @@
-import { TOKEN_PROGRAM_ADDRESS, fetchMint, findAssociatedTokenPda } from "@solana-program/token";
 import {
+  TOKEN_PROGRAM_ADDRESS,
+  fetchMint,
+  fetchToken,
+  findAssociatedTokenPda,
+  getCreateAssociatedTokenInstruction,
+} from "@solana-program/token";
+import {
+  Instruction,
   TransactionSigner,
+  addSignersToTransactionMessage,
   address,
   appendTransactionMessageInstructions,
+  assertIsSendableTransaction,
   assertIsTransactionWithinSizeLimit,
   createSolanaRpc,
   createSolanaRpcSubscriptions,
   createTransactionMessage,
+  getAddressEncoder,
+  getBase64EncodedWireTransaction,
+  getBytesEncoder,
+  getProgramDerivedAddress,
+  getPublicKeyFromAddress,
   pipe,
   sendAndConfirmTransactionFactory,
   setTransactionMessageFeePayerSigner,
@@ -15,23 +29,14 @@ import {
 } from "@solana/kit";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import BigNumber from "bignumber.js";
-import { sign } from "crypto";
 import _ from "lodash";
 import { parse as uuidParse, v4 as uuidV4 } from "uuid";
-import { zeroAddress } from "viem";
-import { getAccount, readContract, readContracts, waitForTransactionReceipt, writeContract } from "wagmi/actions";
-import { DEVNET_CHAIN_ID, contracts } from "../constants";
-import { getCreateWithDurationsLlInstructionAsync } from "../generated/linear/instructions";
-import type {
-  IAddress,
-  IAmountWithDecimals,
-  IAmountWithDecimals18,
-  ICreateLinearWithDurations,
-  ICreateLinearWithTimestamps,
-  ISeconds,
-  ISegmentD,
-  IWithdrawLockup,
-} from "../types";
+import { fetchStreamData } from "../generated/linear/accounts/streamData";
+import {
+  getCreateWithDurationsLlInstructionAsync,
+  getWithdrawInstructionAsync,
+} from "../generated/linear/instructions";
+import { SABLIER_LOCKUP_PROGRAM_ADDRESS } from "../generated/linear/programs/sablierLockup";
 import { erroneous, expect } from "../utils";
 
 function doGenerateSalt() {
@@ -45,6 +50,28 @@ function doGenerateSalt() {
       .join("");
 
   return new BigNumber(hex);
+}
+
+async function getStreamDataPda(nftMint: ReturnType<typeof address>) {
+  return await getProgramDerivedAddress({
+    programAddress: SABLIER_LOCKUP_PROGRAM_ADDRESS,
+    seeds: [getBytesEncoder().encode(new TextEncoder().encode("stream_data")), getAddressEncoder().encode(nftMint)],
+  });
+}
+
+async function getNftRecipient(rpc: ReturnType<typeof createSolanaRpc>, nftMint: ReturnType<typeof address>) {
+  try {
+    const largestAccounts = await rpc.getTokenLargestAccounts(nftMint).send();
+    const largestAccount = largestAccounts.value?.[0]?.address;
+
+    if (!largestAccount) {
+      throw new Error("No token accounts found for NFT mint");
+    }
+    const tokenAccount = await fetchToken(rpc, largestAccount);
+    return tokenAccount.data.owner;
+  } catch (error) {
+    throw new Error(`Failed to get NFT recipient: ${error}`);
+  }
 }
 
 class LockupCore {
@@ -72,12 +99,13 @@ class LockupCore {
       }
 
       const mint = address(state.token);
-      const rpc = createSolanaRpc("https://api.devnet.solana.com");
-      const rpcSubscriptions = createSolanaRpcSubscriptions("wss://api.devnet.solana.com");
+      const rpc = createSolanaRpc("https://devnet.helius-rpc.com/?api-key=22b77efb-b546-4e53-aff5-eacfd2bd1349");
+      const rpcSubscriptions = createSolanaRpcSubscriptions(
+        "wss://devnet.helius-rpc.com/?api-key=22b77efb-b546-4e53-aff5-eacfd2bd1349",
+      );
       const mintInfo = await fetchMint(rpc, mint);
       const decimals = mintInfo.data.decimals;
 
-      /** We use BigNumber to convert float values to decimal padded BigInts */
       const padding = new BigNumber(10).pow(new BigNumber(decimals.toString()));
       const amount = BigInt(new BigNumber(state.amount).times(padding).toFixed());
 
@@ -121,8 +149,6 @@ class LockupCore {
 
       const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-      console.info("Latest blockhash", latestBlockhash);
-
       const transactionMessage = pipe(
         createTransactionMessage({ version: 0 }),
         (tx) => setTransactionMessageFeePayerSigner(signer, tx),
@@ -147,123 +173,126 @@ class LockupCore {
     }
   }
 
-  static async doCreateLinearWithDurationsRaw(payload: ICreateLinearWithDurations) {
-    const data = _.clone(payload);
-    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
-      const sender = await getAccount(config).address;
-      if (!expect(sender, "sender")) {
-        return;
-      }
-      data.sender = sender;
-    }
-
-    console.info("Payload", data);
-
-    const hash = await writeContract(config, {
-      address: contracts[DEVNET_CHAIN_ID].SablierLockupLinear,
-      abi: ABI.SablierLockupLinear.abi,
-      functionName: "createWithDurations",
-      args: [data],
-    });
-    return waitForTransactionReceipt(config, { hash });
-  }
-
-  static async doCreateLinearWithTimestampsRaw(payload: ICreateLinearWithTimestamps) {
-    const data = _.clone(payload);
-    if (data.sender.toString() === "<< YOUR CONNECTED ADDRESS AS THE SENDER >>") {
-      const sender = await getAccount(config).address;
-      if (!expect(sender, "sender")) {
-        return;
-      }
-      data.sender = sender;
-    }
-
-    console.info("Payload", data);
-
-    const hash = await writeContract(config, {
-      address: contracts[DEVNET_CHAIN_ID].SablierLockupLinear,
-      abi: ABI.SablierLockupLinear.abi,
-      functionName: "createWithTimestamps",
-      args: [data],
-    });
-    return waitForTransactionReceipt(config, { hash });
-  }
-
   static async doWithdraw(
     state: {
-      contract: string | undefined;
-      streamId: string | undefined;
+      nftMint: string | undefined;
       amount: string | undefined;
     },
+    signer: TransactionSigner,
     log: (value: string) => void,
   ) {
     try {
-      if (
-        !expect(state.streamId, "streamId") ||
-        !expect(state.contract, "contract") ||
-        !expect(state.amount, "amount")
-      ) {
+      if (!expect(state.nftMint, "nftMint") || !expect(state.amount, "amount")) {
         return;
       }
 
-      const [asset, to] = await readContracts(config, {
-        contracts: [
-          {
-            address: state.contract as IAddress,
-            abi: ABI.SablierLockupLinear.abi, // These methods are included in the ISablierLockup interfaces, so common across all variants (LL, LT, LD)
-            functionName: "getAsset",
-            args: [BigInt(state.streamId)],
-          },
-          {
-            address: state.contract as IAddress,
-            abi: ABI.SablierLockupLinear.abi, // These methods are included in the ISablierLockup interfaces, so common across all variants (LL, LT, LD)
-            functionName: "getRecipient",
-            args: [BigInt(state.streamId)],
-          },
-        ],
-        allowFailure: false,
-      });
+      const nftMint = address(state.nftMint);
+      const rpc = createSolanaRpc("https://devnet.helius-rpc.com/?api-key=22b77efb-b546-4e53-aff5-eacfd2bd1349");
 
-      const decimals = await readContract(config, {
-        address: asset,
-        abi: ABI.ERC20.abi,
-        functionName: "decimals",
-      });
+      const [streamDataPda] = await getStreamDataPda(nftMint);
+      const streamData = await fetchStreamData(rpc, streamDataPda);
 
-      /** We use BigNumber to convert float values to decimal padded BigInts */
+      const sender = streamData.data.sender;
+      const mint = streamData.data.depositedTokenMint;
+      const recipient = await getNftRecipient(rpc, nftMint);
+      const mintInfo = await fetchMint(rpc, mint);
+      const decimals = mintInfo.data.decimals;
+
       const padding = new BigNumber(10).pow(new BigNumber(decimals.toString()));
-
-      const sender = await getAccount(config).address;
-      if (!expect(sender, "sender")) {
-        return;
-      }
-
       const amount = BigInt(new BigNumber(state.amount).times(padding).toFixed());
 
-      /** The public withdraw is locked to the recipient's address. Recipients themselves can chose a different withdraw address. */
-      const payload: IWithdrawLockup = [BigInt(state.streamId), to, amount];
-
-      console.info("Payload", payload);
-
-      const hash = await writeContract(config, {
-        address: contracts[DEVNET_CHAIN_ID].SablierLockupLinear,
-        abi: ABI.SablierLockupLinear.abi,
-        functionName: "withdraw",
-        args: payload,
+      const [associatedTokenAddress] = await findAssociatedTokenPda({
+        mint,
+        owner: recipient,
+        tokenProgram: TOKEN_PROGRAM_ADDRESS,
       });
 
-      if (hash) {
-        log(`Withdrawal for Stream #${state.streamId} sent to the blockchain with hash: ${hash}.`);
+      const instructions: Instruction[] = [];
+      try {
+        await fetchToken(rpc, associatedTokenAddress);
+      } catch (error) {
+        console.log("ATA doesn't exist, creating it: ", error);
+        const createAtaInstruction = getCreateAssociatedTokenInstruction({
+          payer: signer,
+          mint,
+          owner: recipient,
+          ata: associatedTokenAddress,
+          tokenProgram: TOKEN_PROGRAM_ADDRESS,
+        });
+        instructions.push(createAtaInstruction);
       }
 
-      const receipt = await waitForTransactionReceipt(config, { hash });
+      const withdrawInstruction = await getWithdrawInstructionAsync({
+        signer,
+        amount,
+        depositedTokenMint: mint,
+        streamRecipient: recipient,
+        streamNftMint: nftMint,
+        withdrawalRecipient: recipient,
+        withdrawalRecipientAta: associatedTokenAddress,
+        depositedTokenProgram: mintInfo.programAddress,
+        nftTokenProgram: address(TOKEN_PROGRAM_ID.toString()),
+        chainlinkProgram: address("HEvSKofvBgfaexv23kMabbYqxasxU3mQ4ibBMEmJWHny"),
+        chainlinkSolUsdFeed: address("99B2bTijsU6f1GCT73HmdR7HCFFjGMBcPZY6jZ96ynrR"),
+      });
 
-      if (receipt?.status === "success") {
-        log(`Withdrawal for Stream #${state.streamId} successful.`);
-      } else {
-        log(`Withdrawal for Stream #${state.streamId} failed.`);
+      instructions.push(withdrawInstruction);
+
+      const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+      let transactionMessage = pipe(
+        createTransactionMessage({ version: 0 }),
+        (tx) => setTransactionMessageFeePayerSigner(signer, tx),
+        (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+        (tx) => appendTransactionMessageInstructions(instructions, tx),
+      );
+
+      transactionMessage = addSignersToTransactionMessage([signer], transactionMessage);
+      const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
+      assertIsSendableTransaction(signedTransaction);
+      const encodedTransaction = getBase64EncodedWireTransaction(signedTransaction);
+      const signature = await rpc
+        .sendTransaction(encodedTransaction, {
+          preflightCommitment: "confirmed",
+          encoding: "base64",
+          skipPreflight: true,
+        })
+        .send();
+
+      // Wait for confirmation
+      let confirmed = false;
+      let attempts = 0;
+      const maxAttempts = 30;
+
+      while (!confirmed && attempts < maxAttempts) {
+        try {
+          const status = await rpc.getSignatureStatuses([signature]).send();
+          if (
+            status.value[0]?.confirmationStatus === "confirmed" ||
+            status.value[0]?.confirmationStatus === "finalized"
+          ) {
+            confirmed = true;
+            break;
+          }
+        } catch (error) {
+          // Continue waiting
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        attempts++;
       }
+
+      if (!confirmed) {
+        throw new Error("Transaction failed to confirm within timeout");
+      }
+
+      return {
+        sender,
+        mint,
+        recipient,
+      };
     } catch (error) {
+      log(`Failed to withdraw from stream: ${error}`);
       erroneous(error);
     }
   }

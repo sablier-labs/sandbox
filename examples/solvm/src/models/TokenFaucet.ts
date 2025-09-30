@@ -10,15 +10,15 @@ import {
   TransactionSigner,
   address,
   appendTransactionMessageInstructions,
-  assertIsTransactionWithinSizeLimit,
+  assertIsSendableTransaction,
   createSolanaRpc,
-  createSolanaRpcSubscriptions,
   createTransactionMessage,
   pipe,
-  sendAndConfirmTransactionFactory,
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
   signTransactionMessageWithSigners,
+  addSignersToTransactionMessage,
+  getBase64EncodedWireTransaction,
 } from "@solana/kit";
 import BigNumber from "bignumber.js";
 import _ from "lodash";
@@ -42,8 +42,7 @@ class TokenFaucet {
       }
 
       const mint = address(token);
-      const rpc = createSolanaRpc("https://api.devnet.solana.com");
-      const rpcSubscriptions = createSolanaRpcSubscriptions("wss://api.devnet.solana.com");
+      const rpc = createSolanaRpc("https://devnet.helius-rpc.com/?api-key=22b77efb-b546-4e53-aff5-eacfd2bd1349");
       const mintInfo = await fetchMint(rpc, mint);
       const decimals = mintInfo.data.decimals;
 
@@ -86,16 +85,50 @@ class TokenFaucet {
 
       const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-      const transactionMessage = pipe(
+      let transactionMessage = pipe(
         createTransactionMessage({ version: 0 }),
         (tx) => setTransactionMessageFeePayerSigner(signer, tx),
         (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
         (tx) => appendTransactionMessageInstructions(instructions, tx),
       );
 
+      // Explicitly add signers to the transaction message
+      transactionMessage = addSignersToTransactionMessage([signer], transactionMessage);
+
       const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
-      assertIsTransactionWithinSizeLimit(signedTransaction);
-      await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(signedTransaction, { commitment: "confirmed" });
+      assertIsSendableTransaction(signedTransaction);
+
+      // Use direct RPC call instead of sendAndConfirmTransactionFactory
+      const encodedTransaction = getBase64EncodedWireTransaction(signedTransaction);
+      const signature = await rpc.sendTransaction(encodedTransaction, {
+        preflightCommitment: "confirmed",
+        encoding: "base64",
+        skipPreflight: true,
+      }).send();
+
+      // Wait for confirmation
+      let confirmed = false;
+      let attempts = 0;
+      const maxAttempts = 30;
+
+      while (!confirmed && attempts < maxAttempts) {
+        try {
+          const status = await rpc.getSignatureStatuses([signature]).send();
+          if (status.value[0]?.confirmationStatus === "confirmed" || status.value[0]?.confirmationStatus === "finalized") {
+            confirmed = true;
+            break;
+          }
+        } catch (error) {
+          // Continue waiting
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        attempts++;
+      }
+
+      if (!confirmed) {
+        throw new Error("Transaction failed to confirm within timeout");
+      }
 
       return {
         success: true,

@@ -26,9 +26,8 @@ export interface IStoreFormLockupWithdraw {
   logs: string[];
   error: string | undefined;
 
-  contract: string | undefined;
   amount: string | undefined;
-  streamId: string | undefined;
+  nftMint: string | undefined;
 
   api: {
     log: (value: string) => void;

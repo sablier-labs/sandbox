@@ -8,8 +8,7 @@ const initial: Omit<IStoreFormLockupWithdraw, "api"> = {
   logs: [],
 
   amount: undefined,
-  contract: contracts[DEVNET_CHAIN_ID].SablierLockupLinear,
-  streamId: undefined,
+  nftMint: undefined,
 };
 
 const prefill: Omit<IStoreFormLockupWithdraw, "api"> = {
@@ -17,8 +16,7 @@ const prefill: Omit<IStoreFormLockupWithdraw, "api"> = {
   logs: [],
 
   amount: "100",
-  contract: contracts[DEVNET_CHAIN_ID].SablierLockupLinear,
-  streamId: "898",
+  nftMint: "DnbZhmWCEE3d9idtgfzWUhXakD6rfY9n5EEwk98CAQCw",
 };
 
 const useStoreForm = createWithEqualityFn<IStoreFormLockupWithdraw>(

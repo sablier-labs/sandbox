@@ -32,7 +32,7 @@ import {
 } from '../instructions';
 
 export const SABLIER_LOCKUP_PROGRAM_ADDRESS =
-  'B1NkZf77LvLw5nft55LUBgyrBaTEbnEmHSCLdrsFzRe4' as Address<'B1NkZf77LvLw5nft55LUBgyrBaTEbnEmHSCLdrsFzRe4'>;
+  '4EauRKrNErKfsR4XetEZJNmvACGHbHnHV4R5dvJuqupC' as Address<'4EauRKrNErKfsR4XetEZJNmvACGHbHnHV4R5dvJuqupC'>;
 
 export enum SablierLockupAccount {
   NftCollectionData,
@@ -275,7 +275,7 @@ export function identifySablierLockupInstruction(
 }
 
 export type ParsedSablierLockupInstruction<
-  TProgram extends string = 'B1NkZf77LvLw5nft55LUBgyrBaTEbnEmHSCLdrsFzRe4',
+  TProgram extends string = '4EauRKrNErKfsR4XetEZJNmvACGHbHnHV4R5dvJuqupC',
 > =
   | ({
       instructionType: SablierLockupInstruction.Cancel;

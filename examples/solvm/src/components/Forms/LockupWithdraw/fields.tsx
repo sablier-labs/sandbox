@@ -1,9 +1,8 @@
 import { useCallback } from "react";
 import type { ChangeEvent } from "react";
 import _ from "lodash";
-import { REGEX_FLOAT, REGEX_INTEGER, DEVNET_CHAIN_ID, contracts } from "../../../constants";
+import { REGEX_FLOAT, REGEX_INTEGER } from "../../../constants";
 import Input from "../../Input";
-import Select from "../../Select";
 import useFormStore from "./store";
 
 export function Amount() {
@@ -41,37 +40,9 @@ export function Amount() {
   );
 }
 
-export function Contract() {
-  const { contract, update } = useFormStore((state) => ({
-    contract: state.contract,
-    update: state.api.update,
-  }));
-
-  const onChange = useCallback(
-    (e: ChangeEvent<HTMLSelectElement>) => {
-      update({ contract: e.target.value });
-    },
-    [update],
-  );
-
-  return (
-    <Select
-      label={"Contract"}
-      id={"contract"}
-      value={_.toString(contract)}
-      source={[
-        { label: "Lockup Dynamic", value: contracts[DEVNET_CHAIN_ID].SablierLockupDynamic },
-        { label: "Lockup Linear", value: contracts[DEVNET_CHAIN_ID].SablierLockupLinear },
-        { label: "Lockup Tranched", value: contracts[DEVNET_CHAIN_ID].SablierLockupTranched },
-      ]}
-      onChange={onChange}
-    />
-  );
-}
-
 export function Identifier() {
-  const { streamId, update } = useFormStore((state) => ({
-    streamId: state.streamId,
+  const { nftMint, update } = useFormStore((state) => ({
+    nftMint: state.nftMint,
     update: state.api.update,
   }));
 
@@ -85,18 +56,16 @@ export function Identifier() {
         return _.toString(input);
       })();
 
-      if (value === "" || new RegExp(REGEX_INTEGER).test(value)) {
-        update({ streamId: value });
-      }
+      update({ nftMint: value });
     },
     [update],
   );
 
   return (
     <Input
-      label={"Stream Id"}
-      id={"streamId"}
-      value={streamId}
+      label={"Nft mint"}
+      id={"nftMint"}
+      value={nftMint}
       onChange={onChange}
       format={"text"}
       placeholder={"Identifier of the stream, e.g., 100 ..."}

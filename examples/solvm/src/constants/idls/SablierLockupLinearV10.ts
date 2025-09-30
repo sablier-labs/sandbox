@@ -1,5 +1,5 @@
 export default {
-  address: "B1NkZf77LvLw5nft55LUBgyrBaTEbnEmHSCLdrsFzRe4",
+  address: "4EauRKrNErKfsR4XetEZJNmvACGHbHnHV4R5dvJuqupC",
   metadata: {
     name: "sablier_lockup",
     version: "0.1.0",
