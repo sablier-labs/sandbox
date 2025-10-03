@@ -20,7 +20,6 @@ import {
   getBase64EncodedWireTransaction,
   getBytesEncoder,
   getProgramDerivedAddress,
-  getPublicKeyFromAddress,
   pipe,
   sendAndConfirmTransactionFactory,
   setTransactionMessageFeePayerSigner,
@@ -31,12 +30,12 @@ import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import BigNumber from "bignumber.js";
 import _ from "lodash";
 import { parse as uuidParse, v4 as uuidV4 } from "uuid";
+import { DEVNET_CHAIN_ID, DEVNET_RPC_HELIUS, contracts } from "../constants";
 import { fetchStreamData } from "../generated/linear/accounts/streamData";
 import {
   getCreateWithDurationsLlInstructionAsync,
   getWithdrawInstructionAsync,
 } from "../generated/linear/instructions";
-import { SABLIER_LOCKUP_PROGRAM_ADDRESS } from "../generated/linear/programs/sablierLockup";
 import { erroneous, expect } from "../utils";
 
 function doGenerateSalt() {
@@ -54,7 +53,7 @@ function doGenerateSalt() {
 
 async function getStreamDataPda(nftMint: ReturnType<typeof address>) {
   return await getProgramDerivedAddress({
-    programAddress: SABLIER_LOCKUP_PROGRAM_ADDRESS,
+    programAddress: contracts[DEVNET_CHAIN_ID].SablierLockupLinear,
     seeds: [getBytesEncoder().encode(new TextEncoder().encode("stream_data")), getAddressEncoder().encode(nftMint)],
   });
 }
@@ -79,7 +78,6 @@ class LockupCore {
     state: {
       amount: string | undefined;
       cancelability: boolean;
-      cliff: string | undefined;
       duration: string | undefined;
       recipient: string | undefined;
       token: string | undefined;
@@ -99,10 +97,8 @@ class LockupCore {
       }
 
       const mint = address(state.token);
-      const rpc = createSolanaRpc("https://devnet.helius-rpc.com/?api-key=22b77efb-b546-4e53-aff5-eacfd2bd1349");
-      const rpcSubscriptions = createSolanaRpcSubscriptions(
-        "wss://devnet.helius-rpc.com/?api-key=22b77efb-b546-4e53-aff5-eacfd2bd1349",
-      );
+      const rpc = createSolanaRpc(DEVNET_RPC_HELIUS);
+
       const mintInfo = await fetchMint(rpc, mint);
       const decimals = mintInfo.data.decimals;
 
@@ -112,15 +108,6 @@ class LockupCore {
       if (!expect(signer, "signer")) {
         return;
       }
-
-      const cliff = (() => {
-        try {
-          if (!_.isNil(state.cliff) && BigInt(state.cliff).toString() === state.cliff) {
-            return Number(state.cliff);
-          }
-        } catch (_error) {}
-        return 0;
-      })();
 
       const salt = doGenerateSalt().toNumber();
 
@@ -140,7 +127,7 @@ class LockupCore {
         depositTokenProgram: mintInfo.programAddress,
         salt,
         depositAmount: amount,
-        cliffDuration: cliff,
+        cliffDuration: 0,
         totalDuration: _.toNumber(state.duration),
         startUnlockAmount: 0,
         cliffUnlockAmount: 0,
@@ -149,7 +136,7 @@ class LockupCore {
 
       const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-      const transactionMessage = pipe(
+      let transactionMessage = pipe(
         createTransactionMessage({ version: 0 }),
         (tx) => setTransactionMessageFeePayerSigner(signer, tx),
         (tx) =>
@@ -160,15 +147,59 @@ class LockupCore {
         (tx) => appendTransactionMessageInstructions([createWithDurationLl], tx),
       );
 
+      log("Building transaction, awaiting signature");
+
+      transactionMessage = addSignersToTransactionMessage([signer], transactionMessage);
       const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
-      assertIsTransactionWithinSizeLimit(signedTransaction);
-      await sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions })(signedTransaction, {
-        commitment: "confirmed",
-        skipPreflight: true,
-      });
+      assertIsSendableTransaction(signedTransaction);
+      const encodedTransaction = getBase64EncodedWireTransaction(signedTransaction);
+
+      log("Signature received, attempting to send onchain");
+
+      const signature = await rpc
+        .sendTransaction(encodedTransaction, {
+          preflightCommitment: "confirmed",
+          encoding: "base64",
+          skipPreflight: true,
+        })
+        .send();
+
+      // Wait for confirmation
+      let confirmed = false;
+      let attempts = 0;
+      const maxAttempts = 30;
+
+      while (!confirmed && attempts < maxAttempts) {
+        try {
+          const status = await rpc.getSignatureStatuses([signature]).send();
+
+          log(`Monitoring stream creation onchain ${attempts + 1}`);
+
+          if (
+            status.value[0]?.confirmationStatus === "confirmed" ||
+            status.value[0]?.confirmationStatus === "finalized"
+          ) {
+            confirmed = true;
+            break;
+          }
+        } catch (error) {
+          // Continue waiting
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        attempts++;
+      }
+
+      if (!confirmed) {
+        throw new Error("Transaction failed to confirm within timeout");
+      }
+
       console.info("LL Stream successfully created.");
+      log(`LL Stream successfully created. https://solscan.io/tx/${signature}?cluster=devnet`);
     } catch (error) {
       console.error("LL Stream creation failed.", error);
+      log("LL Stream creation failed.");
+
       erroneous(error);
     }
   }
@@ -187,7 +218,7 @@ class LockupCore {
       }
 
       const nftMint = address(state.nftMint);
-      const rpc = createSolanaRpc("https://devnet.helius-rpc.com/?api-key=22b77efb-b546-4e53-aff5-eacfd2bd1349");
+      const rpc = createSolanaRpc(DEVNET_RPC_HELIUS);
 
       const [streamDataPda] = await getStreamDataPda(nftMint);
       const streamData = await fetchStreamData(rpc, streamDataPda);
@@ -247,6 +278,8 @@ class LockupCore {
         (tx) => appendTransactionMessageInstructions(instructions, tx),
       );
 
+      log("Building transaction, awaiting signature");
+
       transactionMessage = addSignersToTransactionMessage([signer], transactionMessage);
       const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
       assertIsSendableTransaction(signedTransaction);
@@ -259,6 +292,8 @@ class LockupCore {
         })
         .send();
 
+      log("Signature received, attempting to send onchain");
+
       // Wait for confirmation
       let confirmed = false;
       let attempts = 0;
@@ -267,6 +302,9 @@ class LockupCore {
       while (!confirmed && attempts < maxAttempts) {
         try {
           const status = await rpc.getSignatureStatuses([signature]).send();
+
+          log(`Monitoring stream creation onchain ${attempts + 1}`);
+
           if (
             status.value[0]?.confirmationStatus === "confirmed" ||
             status.value[0]?.confirmationStatus === "finalized"
@@ -285,6 +323,8 @@ class LockupCore {
       if (!confirmed) {
         throw new Error("Transaction failed to confirm within timeout");
       }
+
+      log(`Successfully withdrawn. https://solscan.io/tx/${signature}?cluster=devnet`);
 
       return {
         sender,

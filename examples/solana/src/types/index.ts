@@ -10,7 +10,6 @@ export interface IStoreFormLinear {
 
   amount: string | undefined;
   cancelability: boolean;
-  cliff: string | undefined;
   duration: string | undefined;
   recipient: string | undefined;
   token: string | undefined;
@@ -36,68 +35,4 @@ export interface IStoreFormLockupWithdraw {
   };
 }
 
-export type ICreateLinearWithDurations = {
-  sender: IAddress;
-  recipient: IAddress;
-  totalAmount: IAmountWithDecimals;
-  asset: IAddress;
-  cancelable: boolean;
-  transferable: boolean;
-  durations: { cliff: ISeconds<number>; total: ISeconds<number> };
-};
-
-export type ICreateLinearWithTimestamps = {
-  sender: IAddress;
-  recipient: IAddress;
-  totalAmount: IAmountWithDecimals;
-  asset: IAddress;
-  cancelable: boolean;
-  transferable: boolean;
-  timestamps: { start: ISeconds<number>; cliff: ISeconds<number>; end: ISeconds<number> };
-};
-
-export type ISegmentD<T extends number | bigint = bigint> = {
-  amount: IAmountWithDecimals;
-  exponent: IAmountWithDecimals18;
-  duration: ISeconds<T>;
-};
-
-export type ISegmentT<T extends number | bigint = bigint> = {
-  amount: IAmountWithDecimals;
-  exponent: IAmountWithDecimals18;
-  timestamp: ISeconds<T>;
-};
-
 export type IWithdrawLockup = [streamId: bigint, to: IAddress, amount: bigint];
-
-/** --------- */
-
-export type IBatchCreateLinearWithDurations = [
-  lockup: IAddress,
-  asset: IAddress,
-  batch: {
-    sender: IAddress;
-    recipient: IAddress;
-    totalAmount: IAmountWithDecimals;
-    cancelable: boolean;
-    transferable: boolean;
-    durations: { cliff: ISeconds<number>; total: ISeconds<number> };
-  }[], // Array of streams
-];
-
-export type IBatchCreateLinearWithTimestamps = [
-  lockup: IAddress,
-  asset: IAddress,
-  batch: {
-    sender: IAddress;
-    recipient: IAddress;
-    totalAmount: IAmountWithDecimals;
-    cancelable: boolean;
-    transferable: boolean;
-    timestamps: {
-      start: ISeconds<number>;
-      cliff: ISeconds<number>;
-      end: ISeconds<number>;
-    };
-  }[], // Array of streams
-];

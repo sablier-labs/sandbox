@@ -5,7 +5,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import _ from "lodash";
 import { USDC_DEVNET } from "../../constants";
 import { useTransactionSigner } from "../../contexts";
-import { TokenFaucet } from "../../models";
+import { Faucet } from "../../models";
 
 const Wrapper = styled.div`
   display: flex;
@@ -36,7 +36,7 @@ function Account() {
   const onMint = useCallback(async () => {
     if (signer) {
       try {
-        await TokenFaucet.doMint(USDC_DEVNET, signer);
+        await Faucet.doMint(USDC_DEVNET, signer);
       } catch (error) {
         console.error(error);
       }
@@ -63,11 +63,15 @@ function Account() {
         false
       )}
       {!connected ? (
-        <p>
-          <b>Status:</b> Not connected
-          <span> . . . </span>
+        <div>
+          <p>
+            <b>Status:</b> Not connected
+            <span> . . . </span>
+            <br />
+            <br />
+          </p>
           <WalletMultiButton>Select Wallet</WalletMultiButton>
-        </p>
+        </div>
       ) : (
         false
       )}

@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { useWallet } from "@solana/wallet-adapter-react";
 import _ from "lodash";
 import { useAccount } from "wagmi";
-import { LockupCore } from "../../../models";
-import { Amount, Cancelability, Cliff, Duration, Recipient, Token } from "./fields";
-import useStoreForm, { prefill } from "./store";
 import { useTransactionSigner } from "../../../contexts";
+import { LockupCore } from "../../../models";
+import { Amount, Cancelability, Duration, Recipient, Token } from "./fields";
+import useStoreForm, { prefill } from "./store";
 
 const Wrapper = styled.div`
   display: flex;
@@ -99,7 +99,6 @@ function LockupLinear() {
       <Amount />
       <Recipient />
       <Duration />
-      <Cliff />
       <Divider />
       <Actions>
         <Button onClick={onPrefill}>Prefill form</Button>

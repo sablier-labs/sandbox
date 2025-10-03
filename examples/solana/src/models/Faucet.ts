@@ -8,27 +8,26 @@ import {
 import {
   type Instruction,
   TransactionSigner,
+  addSignersToTransactionMessage,
   address,
   appendTransactionMessageInstructions,
   assertIsSendableTransaction,
   createSolanaRpc,
   createTransactionMessage,
+  getBase64EncodedWireTransaction,
   pipe,
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
   signTransactionMessageWithSigners,
-  addSignersToTransactionMessage,
-  getBase64EncodedWireTransaction,
 } from "@solana/kit";
 import BigNumber from "bignumber.js";
 import _ from "lodash";
+import { DEVNET_RPC_HELIUS } from "../constants";
 import { getMintTokenToInstructionAsync } from "../generated/faucet/instructions";
 import type { IAddress } from "../types";
 import { erroneous, expect } from "../utils";
 
-// SPL Token Program ID
-
-class TokenFaucet {
+class Faucet {
   static async doMint(token: IAddress, signer: TransactionSigner) {
     try {
       if (!expect(token, "token")) {
@@ -42,7 +41,7 @@ class TokenFaucet {
       }
 
       const mint = address(token);
-      const rpc = createSolanaRpc("https://devnet.helius-rpc.com/?api-key=22b77efb-b546-4e53-aff5-eacfd2bd1349");
+      const rpc = createSolanaRpc(DEVNET_RPC_HELIUS);
       const mintInfo = await fetchMint(rpc, mint);
       const decimals = mintInfo.data.decimals;
 
@@ -100,11 +99,13 @@ class TokenFaucet {
 
       // Use direct RPC call instead of sendAndConfirmTransactionFactory
       const encodedTransaction = getBase64EncodedWireTransaction(signedTransaction);
-      const signature = await rpc.sendTransaction(encodedTransaction, {
-        preflightCommitment: "confirmed",
-        encoding: "base64",
-        skipPreflight: true,
-      }).send();
+      const signature = await rpc
+        .sendTransaction(encodedTransaction, {
+          preflightCommitment: "confirmed",
+          encoding: "base64",
+          skipPreflight: true,
+        })
+        .send();
 
       // Wait for confirmation
       let confirmed = false;
@@ -114,7 +115,10 @@ class TokenFaucet {
       while (!confirmed && attempts < maxAttempts) {
         try {
           const status = await rpc.getSignatureStatuses([signature]).send();
-          if (status.value[0]?.confirmationStatus === "confirmed" || status.value[0]?.confirmationStatus === "finalized") {
+          if (
+            status.value[0]?.confirmationStatus === "confirmed" ||
+            status.value[0]?.confirmationStatus === "finalized"
+          ) {
             confirmed = true;
             break;
           }
@@ -122,13 +126,15 @@ class TokenFaucet {
           // Continue waiting
         }
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         attempts++;
       }
 
       if (!confirmed) {
         throw new Error("Transaction failed to confirm within timeout");
       }
+
+      console.log(`Mint done! https://solscan.io/tx/${signature}?cluster=devnet`);
 
       return {
         success: true,
@@ -143,4 +149,4 @@ class TokenFaucet {
   }
 }
 
-export default TokenFaucet;
+export default Faucet;

@@ -74,8 +74,8 @@ function Navigation() {
         <Tab href={"/"} data-active={router.pathname === "/"}>
           <p>Transactions</p>
         </Tab>
-        <Tab href={"/queries"} data-active={router.pathname === "/queries"}>
-          <p>Queries</p>
+        <Tab href={"/"} as={"div"} style={{ pointerEvents: "none" }}>
+          <p>Queries (coming soon)</p>
         </Tab>
       </Tabs>
     </Wrapper>

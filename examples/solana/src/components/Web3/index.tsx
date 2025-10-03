@@ -27,7 +27,7 @@ function Web3Provider({ children }: PropsWithChildren<unknown>) {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider
         wallets={[]}
-        autoConnect={false}
+        autoConnect
         onError={(error) => {
           console.error("Wallet error:", error);
         }}

@@ -1,10 +1,10 @@
-import _ from "lodash";
 import { useCallback } from "react";
 import type { ChangeEvent } from "react";
+import _ from "lodash";
+import { REGEX_ADDRESS, REGEX_FLOAT, REGEX_INTEGER } from "../../../constants";
 import Input from "../../Input";
 import Select from "../../Select";
 import useFormStore from "./store";
-import { REGEX_ADDRESS, REGEX_FLOAT, REGEX_INTEGER } from "../../../constants";
 
 export function Cancelability() {
   const { cancelability, update } = useFormStore((state) => ({
@@ -22,7 +22,7 @@ export function Cancelability() {
 
       update({ cancelability: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -38,7 +38,6 @@ export function Cancelability() {
     />
   );
 }
-
 
 export function Token() {
   const { token, update } = useFormStore((state) => ({
@@ -58,7 +57,7 @@ export function Token() {
 
       update({ token: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -89,15 +88,11 @@ export function Amount() {
         return _.toString(input);
       })();
 
-      if (
-        value === "" ||
-        new RegExp(REGEX_FLOAT).test(value) ||
-        new RegExp(REGEX_INTEGER).test(value)
-      ) {
+      if (value === "" || new RegExp(REGEX_FLOAT).test(value) || new RegExp(REGEX_INTEGER).test(value)) {
         update({ amount: value });
       }
     },
-    [update]
+    [update],
   );
 
   return (
@@ -139,7 +134,7 @@ export function Recipient() {
 
       update({ recipient: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -176,7 +171,7 @@ export function Duration() {
 
       update({ duration: value });
     },
-    [update]
+    [update],
   );
 
   return (
@@ -187,43 +182,6 @@ export function Duration() {
       onChange={onChange}
       format={"text"}
       placeholder={"Duration in seconds, e.g., 86400 (1 Day) ..."}
-    />
-  );
-}
-
-export function Cliff() {
-  const { cliff, update } = useFormStore((state) => ({
-    cliff: state.cliff,
-    update: state.api.update,
-  }));
-
-  const onChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const value = (() => {
-        const input = e.target.value;
-        if (_.isNil(input) || _.toString(input).length === 0) {
-          return "";
-        }
-        return _.toString(input);
-      })();
-
-      if (value !== "" && !new RegExp(REGEX_INTEGER).test(value)) {
-        return;
-      }
-
-      update({ cliff: value });
-    },
-    [update]
-  );
-
-  return (
-    <Input
-      label={"Cliff (Optional)"}
-      id={"cliff"}
-      value={cliff}
-      onChange={onChange}
-      format={"text"}
-      placeholder={"Cliff in seconds, e.g., 0 or 3600 (1 Hour) ..."}
     />
   );
 }

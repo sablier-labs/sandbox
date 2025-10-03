@@ -9,7 +9,6 @@ const initial: Omit<IStoreFormLinear, "api"> = {
 
   amount: undefined,
   cancelability: true,
-  cliff: undefined,
   duration: undefined,
   recipient: undefined,
   token: undefined,
@@ -21,7 +20,6 @@ const prefill: Omit<IStoreFormLinear, "api"> = {
 
   amount: "1",
   cancelability: true,
-  cliff: undefined,
   duration: "86400", // 1 day
   recipient: "GmDP1fjp1sTGfqPz4Vf22E2tXYgdwarnqRwrcVzFhF76",
   token: USDC_DEVNET,

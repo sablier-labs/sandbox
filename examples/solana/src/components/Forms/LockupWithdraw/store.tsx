@@ -15,7 +15,7 @@ const prefill: Omit<IStoreFormLockupWithdraw, "api"> = {
   error: undefined,
   logs: [],
 
-  amount: "100",
+  amount: "0.0001",
   nftMint: "DnbZhmWCEE3d9idtgfzWUhXakD6rfY9n5EEwk98CAQCw",
 };
 

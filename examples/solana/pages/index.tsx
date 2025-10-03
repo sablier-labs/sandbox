@@ -39,7 +39,7 @@ function Home() {
   return (
     <Wrapper>
       <Disclaimer>
-        <p>The Sablier x Wagmi Sandbox is only available on Sepolia</p>
+        <p>The Sablier x @solana/kit (v3) sandbox is only available on Devnet</p>
       </Disclaimer>
       <Container>
         <Navigation />

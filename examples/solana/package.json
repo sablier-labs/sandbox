@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
     "generate:client": "bun run scripts/generateClient.ts --all",
     "generate:client:faucet": "bun run scripts/generateClient.ts faucet",
     "generate:client:linear": "bun run scripts/generateClient.ts linear"
@@ -14,9 +10,6 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
     "@heroicons/react": "^2.1.5",
-    "@openzeppelin/contracts": "4.9.2",
-    "@sablier/v2-core": "~1.2.0",
-    "@sablier/v2-periphery": "~1.2.0",
     "@solana/kit": "^3.0.3",
     "@solana/wallet-adapter-backpack": "^0.1.14",
     "@solana/wallet-adapter-phantom": "^0.9.28",
@@ -35,8 +28,6 @@
     "styled-components": "^6.0.7",
     "styled-normalize": "^8.0.7",
     "uuid": "^13.0.0",
-    "viem": "~2.21.44",
-    "wagmi": "~2.12.19",
     "zustand": "^5.0.1"
   },
   "devDependencies": {

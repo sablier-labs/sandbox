@@ -21,7 +21,7 @@ export const contracts = {
 export const SEPOLIA_DAI = "0x776b6fC2eD15D6Bb5Fc32e0c89DE68683118c62A";
 
 export const REGEX_ADDRESS = /^[0-9xXAaBbCcDdEeFf]+$/;
-export const REGEX_FLOAT = /^[0-9]+[.,]?[0-9]+?$/;
+export const REGEX_FLOAT = /^[0-9]+[.,]?[0-9]*?$/;
 export const REGEX_INTEGER = /^[0-9]+$/;
 
 export * as ABI from "./abi";
