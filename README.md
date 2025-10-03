@@ -5,41 +5,60 @@
 Front-end sandbox development environments for Sablier. Create streams onchain or source them for preview from indexers
 (the graph, envio).
 
-## Background
+The sandbox features integration examples for both EVM (Sepolia) and Solana (Devnet).
 
-Sablier is a smart contract protocol that enables trustless streaming of ERC-20 assets, which means the ability to make
-payments by the second.
+| Product          | EVM Sandbox | Solana Sandbox |
+| ---------------- | ----------- | -------------- |
+| Lockup Linear    | ✔︎         | ✔︎            |
+| Lockup Dynamic   | ✔︎         | -              |
+| Lockup Tranched  | ✔︎         | -              |
+| Flow             | ✔︎         | -              |
+| Instant Airdrops | 🕑          | 🕑             |
+| Vested Airdrops  | 🕑          | -              |
 
-### Lockup
+## Featured Products 🔮
+
+### 1. Lockup 🔮
 
 There are three types of lockup streaming in Sablier:
 
-- **LockupLinear**, abbreviated as **LL**, which creates streams with linear streaming functions
-- **LockupDynamic**, abbreviated as **LD**, which creates streams with dynamic streaming functions (examples:
-  exponentials, logarithms)
-- **LockupTranched**, abbreviated as **LT**, which creates streams with stepper/tranched streaming functions (examples:
-  monthly, timelocks, step functions)
+- `Lockup Linear`, which creates streams with linear streaming functions
+- `Lockup Dynamic`, which creates streams with dynamic streaming functions (examples: exponentials, logarithms)
+- `LockupTranched`, which creates streams with stepper/tranched streaming functions (examples: monthly, timelocks, step
+  functions)
 
-For more information, please refer to our [documentation](https://docs.sablier.com).
+> [!IMPORTANT]
+>
+> In some versions of Sablier, each flavor (LL, LD, LT) of Lockup was housed in its own contract. With the latest
+> implementations, the Sablier Lockup contracts will all be accessible through a unified merged interface (Lockup Merged
+> or LK).
 
-We also support examples of how to **Withdraw** from a Lockup stream.
+We also support examples on how to **Withdraw** from a Lockup stream.
 
-### Flow
+For more technical details, please refer to our [documentation](https://docs.sablier.com).
 
-Flow streams work within an open-ended model (no upfront deposits, top-ups, rate adjustments, no end date).
+### 2. Flow 🔮
 
-For more information, please refer to our [documentation](https://docs.sablier.com).
-
-The sandbox will showcase how to create a **Flow** stream with a certain rate per second and initial deposit (which can
-also be topped up later on).
+Flow streams work within an open-ended model (no upfront deposits, top-ups, rate adjustments, no end date). The sandbox
+will showcase how to create a **Flow** stream with a certain rate per second and initial deposit (which can also be
+topped up later on).
 
 We also support examples of how to **Withdraw** from a Flow stream.
+
+For more technical details, please refer to our [documentation](https://docs.sablier.com).
+
+### 3. Airdrops 🔮
+
+Instant and vested airdrops facilitate distribution of tokens (through one-time claims or streams) at scale. This
+sandbox doesn't currently feature integration examples. Feel free to reach out to the team for guidance.
+
+For more technical details, please refer to our [documentation](https://docs.sablier.com).
 
 ## Environments and Examples
 
 ![Sablier Sandbox](/packages/assets/banner-s2.png)
 
-### Wagmi
+### EVM: Wagmi 🟦
 
 The official Sablier interface uses [wagmi](wagmi.sh/) and [viem](https://viem.sh/). Both libraries offer top-notch
 support (check the docs and their github) and integrate nicely with wallet managers like RainbowKit or AppKit.
@@ -72,12 +91,12 @@ support (check the docs and their github) and integrate nicely with wallet manag
 
 - Create group of LL, LD or LT streams with all possible configurations in headless mode, through a dedicated periphery.
 
-Most of the transaction magic happens in [`models/LockupCore.ts`](/examples/wagmi/src/models/LockupCore.ts) and
-[`models/FlowCore.ts`](/examples/wagmi/src/models/FlowCore.ts). Have a look to understand how parameters are formatted
+Most of the transaction magic happens in [`models/LockupCore.ts`](/examples/evm/src/models/LockupCore.ts) and
+[`models/FlowCore.ts`](/examples/evm/src/models/FlowCore.ts). Have a look to understand how parameters are formatted
 (strings to BigInt, padding numbers with decimals, etc.) and sent to the contracts.
 
-For the **headless** mode, see [`constants/data.ts`](/examples/wagmi/src/constants/data.ts). Here, you'll be able to
-tweak the parameters to create streams of different values or shapes (segments).
+For the **headless** mode, see [`constants/data.ts`](/examples/evm/src/constants/data.ts). Here, you'll be able to tweak
+the parameters to create streams of different values or shapes (segments).
 
 **↪ Misc.**
 
@@ -98,18 +117,38 @@ with your "sender" wallet to see what the stream [actually looks like](https://d
 
 ---
 
-![Sablier V2 Sandbox](/packages/assets/banner-s1.png)
+![Sablier Sandbox Solana](/packages/assets/banner-sandbox-solana.png)
 
-### Ethers V6
+### @solana/kit 🟪
 
-An integration of Sablier contracts into a frontend environment that uses [Ethers V6](https://docs.ethers.org/v6/). It's
-a small app that runs on the Sepolia testnet and provides an injected wallet connection out of the box.
+The [examples/solana](/examples/solana/) directory features an integration of Sablier's Solana contracts into a Next app
+powered by [@solana/kit](https://github.com/anza-xyz/kit).
 
 > [!TIP]
 >
-> The Ethers examples do not include all possible variations, so we invite you to look into the Wagmi examples and
-> attempt to convert them yourself.
+> The Solana examples do not include all possible variations since some features haven't been ported over yet.
 
 #### Features
 
-- Create an LL, LD or LT stream with Durations or Timestamps in headless mode (tweak durations in code)
+- Create an LL stream with Durations
+- Withdraw from an LL stream
+
+#### Considerations
+
+The @solana/kit transaction signing is a bit clunky, so we're going to use the RPC methods to get our transaction
+through.
+
+---
+
+## Airdrops Helper
+
+### Merkle Proof Generator
+
+For customers integrating airdrop campaigns into their own UI we recommend either:
+
+- using a self-hosted [rust merkle-api](https://github.com/sablier-labs/merkle-api)
+- getting in touch for a scalable dedicated server (managed by Sablier)
+- pre-generating proofs and serving them locally in their own app
+
+For the final option, a TS script which computes the list of merkle proofs can be
+[found here](https://gist.github.com/gavriliumircea/c94ccbabac4b71c307040a3516207ae1).
