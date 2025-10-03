@@ -1,5 +1,5 @@
 {
-  "name": "@sablier/sandbox-solvm",
+  "name": "@sablier/sandbox-solana",
   "version": "1.0.0",
   "private": true,
   "scripts": {
