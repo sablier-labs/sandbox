@@ -67,15 +67,12 @@ const getStreams = gql/* GraphQL */ `
       refundedAmount
       withdrawnAmount
       snapshotAmount
-      protocolFeeAmount
       position
       version
+      contract
       asset {
         id
         symbol
-      }
-      contract {
-        address
       }
     }
   }
