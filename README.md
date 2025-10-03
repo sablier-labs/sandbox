@@ -137,3 +137,18 @@ powered by [@solana/kit](https://github.com/anza-xyz/kit).
 
 The @solana/kit transaction signing is a bit clunky, so we're going to use the RPC methods to get our transaction
 through.
+
+---
+
+## Airdrops Helper
+
+### Merkle Proof Generator
+
+For customers integrating airdrop campaigns into their own UI we recommend either:
+
+- using a self-hosted [rust merkle-api](https://github.com/sablier-labs/merkle-api)
+- getting in touch for a scalable dedicated server (managed by Sablier)
+- pre-generating proofs and serving them locally in their own app
+
+For the final option, a TS script which computes the list of merkle proofs can be
+[found here](https://gist.github.com/gavriliumircea/c94ccbabac4b71c307040a3516207ae1).
