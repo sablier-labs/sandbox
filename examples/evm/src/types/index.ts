@@ -114,6 +114,19 @@ export interface IStoreFormFlowWithdraw {
   };
 }
 
+export interface IStoreFormFlowStreamInfo {
+  logs: string[];
+  error: string | undefined;
+
+  streamId: string | undefined;
+
+  api: {
+    log: (value: string) => void;
+    update: (updates: Partial<IStoreFormFlowStreamInfo>) => void;
+    reset: () => void;
+  };
+}
+
 export type ICreateLinearWithDurations = {
   sender: IAddress;
   recipient: IAddress;
@@ -310,3 +323,16 @@ export type IBatchCreateTranchedWithTimestamps = [
     broker: { account: IAddress; fee: 0n };
   }[], // Array of streams
 ];
+
+export interface IStreamState {
+  owner: IAddress;
+  rps: bigint;
+  startTimestamp: number;
+  balance: bigint;
+  tokenAddress: IAddress;
+  tokenDecimals: number;
+  snapshotTime: number;
+  snapshotDebtScaled: bigint;
+  isTransferable: boolean;
+  isVoided: boolean;
+}
