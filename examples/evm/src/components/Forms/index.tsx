@@ -2,6 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import { useAccount } from "wagmi";
 import Flow from "./Flow";
+import FlowStreamInfo from "./FlowStreamInfo";
 import FlowWithdraw from "./FlowWithdraw";
 import LockupDynamic from "./LockupDynamic";
 import LockupHeadless from "./LockupHeadless";
@@ -143,9 +144,13 @@ function Forms() {
             <Tab data-active={tab === 1} onClick={() => setTab(1)}>
               <p>⬇️ Withdraw</p>
             </Tab>
+            <Tab data-active={tab === 2} onClick={() => setTab(2)}>
+              <p>📊 Stream Info</p>
+            </Tab>
           </Tabs>
           {tab === 0 && <Flow />}
           {tab === 1 && <FlowWithdraw />}
+          {tab === 2 && <FlowStreamInfo />}
         </>
       )}
     </Wrapper>
