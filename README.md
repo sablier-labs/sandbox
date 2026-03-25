@@ -5,16 +5,16 @@
 Front-end sandbox development environments for Sablier. Create streams onchain or source them for preview from indexers
 (the graph, envio).
 
-The sandbox features integration examples for both EVM (Sepolia) and Solana (Devnet).
+The sandbox features integration examples for EVM (Sepolia).
 
-| Product          | EVM Sandbox | Solana Sandbox |
-| ---------------- | ----------- | -------------- |
-| Lockup Linear    | ✔︎         | ✔︎            |
-| Lockup Dynamic   | ✔︎         | -              |
-| Lockup Tranched  | ✔︎         | -              |
-| Flow             | ✔︎         | -              |
-| Instant Airdrops | 🕑          | 🕑             |
-| Vested Airdrops  | 🕑          | -              |
+| Product          | EVM Sandbox |
+| ---------------- | ----------- |
+| Lockup Linear    | ✔︎         |
+| Lockup Dynamic   | ✔︎         |
+| Lockup Tranched  | ✔︎         |
+| Flow             | ✔︎         |
+| Instant Airdrops | 🕑          |
+| Vested Airdrops  | 🕑          |
 
 ## Featured Products 🔮
 
@@ -114,29 +114,6 @@ with your "sender" wallet to see what the stream [actually looks like](https://d
 | Payload (LD with two segments)            | Shape                                      |
 | ----------------------------------------- | ------------------------------------------ |
 | ![E](./packages/assets/emission-code.png) | ![E](./packages/assets/emission-shape.png) |
-
----
-
-![Sablier Sandbox Solana](/packages/assets/banner-sandbox-solana.png)
-
-### @solana/kit 🟪
-
-The [examples/solana](/examples/solana/) directory features an integration of Sablier's Solana contracts into a Next app
-powered by [@solana/kit](https://github.com/anza-xyz/kit).
-
-> [!TIP]
->
-> The Solana examples do not include all possible variations since some features haven't been ported over yet.
-
-#### Features
-
-- Create an LL stream with Durations
-- Withdraw from an LL stream
-
-#### Considerations
-
-The @solana/kit transaction signing is a bit clunky, so we're going to use the RPC methods to get our transaction
-through.
 
 ---
 
