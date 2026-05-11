@@ -14,8 +14,10 @@ export function LockupTranched() {
   const { api } = state;
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-bold text-white">Create Tranched Stream (durations)</h2>
+    <div className="flex flex-col gap-5">
+      <h2 className="border-b border-ink-300 pb-3 text-lg font-bold text-white">
+        Create Tranched Stream <span className="font-medium text-mist-400">(durations)</span>
+      </h2>
 
       <Field
         label="Token address"
@@ -34,9 +36,9 @@ export function LockupTranched() {
         value={state.shape}
       />
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3 rounded-md border-2 border-ink-300 bg-ink-100 px-4 py-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold tracking-wide text-mist-300 uppercase">
+          <span className="text-xs font-semibold tracking-wide text-mist-200 uppercase">
             Tranches
           </span>
           <Button intent="ghost" onClick={api.addTranche}>
@@ -69,7 +71,7 @@ export function LockupTranched() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-4">
         <Toggle
           checked={state.cancelability}
           label="Cancelable"
@@ -82,7 +84,7 @@ export function LockupTranched() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-ink-300 pt-4">
         <Button
           intent="secondary"
           onClick={() =>

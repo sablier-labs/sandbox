@@ -83,60 +83,69 @@ export function LockupQueries() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-mist-300">
-          Endpoint:{" "}
-          <code className="rounded-sm bg-ink-300 px-1 py-0.5 font-mono text-white">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="flex flex-wrap items-center gap-1.5 text-xs text-mist-300">
+          Endpoint
+          <code className="rounded-sm bg-ink-200 px-1.5 py-0.5 font-mono text-[11px] break-all text-mist">
             {INDEXER_ENDPOINT}
           </code>
         </span>
         <Button intent="ghost" onClick={() => query.refetch()}>
-          <RefreshCw className="size-3" /> Refresh
+          <RefreshCw className={`size-3 ${query.isFetching ? "animate-spin" : ""}`} /> Refresh
         </Button>
       </div>
 
-      {query.isLoading ? <p className="text-sm text-mist-300">Loading streams…</p> : null}
+      {query.isLoading ? (
+        <div aria-label="Loading streams" className="flex flex-col gap-2" role="status">
+          {[0, 1, 2, 3].map((i) => (
+            <div className="h-8 animate-pulse rounded-md bg-ink-100" key={i} />
+          ))}
+        </div>
+      ) : null}
       {query.error ? (
-        <p className="text-sm text-danger">Failed to load: {(query.error as Error).message}</p>
+        <p className="rounded-md border-2 border-danger/30 bg-danger/5 p-3 text-sm text-danger">
+          Failed to load: {(query.error as Error).message}
+        </p>
       ) : null}
 
       {query.data ? (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-md border border-ink-300">
           <table className="w-full font-mono text-xs">
-            <thead className="text-mist-300 uppercase">
-              <tr className="border-b border-ink-300">
-                <th className="p-2 text-left">Stream</th>
-                <th className="p-2 text-left">Category</th>
-                <th className="p-2 text-left">Shape</th>
-                <th className="p-2 text-left">Sender</th>
-                <th className="p-2 text-left">Recipient</th>
-                <th className="p-2 text-right tabular-nums">Deposit</th>
-                <th className="p-2 text-right tabular-nums">Withdrawn</th>
-                <th className="p-2 text-right tabular-nums">Intact</th>
+            <thead className="bg-ink-100/40 text-[11px] tracking-wider text-mist-300 uppercase">
+              <tr>
+                <th className="p-2.5 text-left font-semibold">Stream</th>
+                <th className="p-2.5 text-left font-semibold">Category</th>
+                <th className="p-2.5 text-left font-semibold">Shape</th>
+                <th className="p-2.5 text-left font-semibold">Sender</th>
+                <th className="p-2.5 text-left font-semibold">Recipient</th>
+                <th className="p-2.5 text-right font-semibold tabular-nums">Deposit</th>
+                <th className="p-2.5 text-right font-semibold tabular-nums">Withdrawn</th>
+                <th className="p-2.5 text-right font-semibold tabular-nums">Intact</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-ink-300/60">
               {query.data.streams.map((s) => (
-                <tr className="border-b border-ink-300 text-white" key={s.id}>
-                  <td className="p-2">{s.alias || s.id}</td>
-                  <td className="p-2 text-mist-200">{s.category}</td>
-                  <td className="p-2 text-mist-200">{s.shape || "—"}</td>
-                  <td className="p-2">{shortAddress(s.sender)}</td>
-                  <td className="p-2">{shortAddress(s.recipient)}</td>
-                  <td className="p-2 text-right tabular-nums">
-                    {fromUnits(BigInt(s.depositAmount), s.asset.decimals)} {s.asset.symbol}
+                <tr className="text-white transition-colors hover:bg-ink-100/40" key={s.id}>
+                  <td className="p-2.5">{s.alias || s.id}</td>
+                  <td className="p-2.5 text-mist-300">{s.category}</td>
+                  <td className="p-2.5 text-mist-300">{s.shape || "—"}</td>
+                  <td className="p-2.5">{shortAddress(s.sender)}</td>
+                  <td className="p-2.5">{shortAddress(s.recipient)}</td>
+                  <td className="p-2.5 text-right tabular-nums">
+                    {fromUnits(BigInt(s.depositAmount), s.asset.decimals)}{" "}
+                    <span className="text-mist-400">{s.asset.symbol}</span>
                   </td>
-                  <td className="p-2 text-right tabular-nums">
+                  <td className="p-2.5 text-right tabular-nums">
                     {fromUnits(BigInt(s.withdrawnAmount), s.asset.decimals)}
                   </td>
-                  <td className="p-2 text-right tabular-nums">
+                  <td className="p-2.5 text-right tabular-nums">
                     {fromUnits(BigInt(s.intactAmount), s.asset.decimals)}
                   </td>
                 </tr>
               ))}
               {!query.data.streams.length ? (
                 <tr>
-                  <td className="p-3 text-center text-mist-300" colSpan={8}>
+                  <td className="p-6 text-center text-mist-300" colSpan={8}>
                     No streams yet — create one above.
                   </td>
                 </tr>

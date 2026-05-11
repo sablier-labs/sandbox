@@ -24,9 +24,9 @@ export function Forms() {
   if (!isConnected) return null;
 
   return (
-    <section className="flex w-full flex-col gap-4 rounded-md border-2 border-ink-300 bg-ink-50">
+    <section className="flex h-fit w-full flex-col rounded-md border-2 border-ink-300 bg-ink-50 shadow-sm shadow-black/20">
       <Tabs<TabId> active={tab} onChange={setTab} options={[...tabs]} purpose="feature" />
-      <div className="px-5 pb-5">
+      <div className="px-5 pt-4 pb-5">
         {tab === "linear" ? <LockupLinear /> : null}
         {tab === "tranched" ? <LockupTranched /> : null}
         {tab === "withdraw" ? <LockupWithdraw /> : null}

@@ -1,15 +1,15 @@
 "use client";
 
+import { Check } from "lucide-react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { useId } from "react";
 import { tv } from "tailwind-variants";
-import { cn } from "@/lib/cn";
 
-const wrapper = tv({ base: "flex flex-col gap-1" });
+const wrapper = tv({ base: "flex flex-col gap-1.5" });
 const label = tv({ base: "text-xs font-semibold tracking-wide text-mist-300 uppercase" });
 const helper = tv({ base: "text-xs text-mist-500" });
 const input = tv({
-  base: "w-full rounded-md border-2 border-ink-300 bg-ink-100 px-3 py-2 font-mono text-sm text-white outline-none focus:border-orange disabled:cursor-not-allowed disabled:opacity-60",
+  base: "w-full rounded-md border-2 border-ink-300 bg-ink-100 px-3 py-2.5 font-mono text-sm text-white transition-colors outline-none placeholder:text-mist-500 hover:border-ink-300/80 focus:border-orange focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-60",
 });
 
 type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
@@ -39,16 +39,16 @@ type CheckboxFieldProps = {
 
 export function Toggle({ checked, onChange, label: labelText }: CheckboxFieldProps) {
   return (
-    <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-white">
+    <label className="group inline-flex cursor-pointer items-center gap-2 text-sm text-white select-none">
       <input
         checked={checked}
-        className={cn(
-          "size-4 rounded-sm border-2 border-ink-300 bg-ink-100 accent-orange",
-          "focus:ring-2 focus:ring-orange",
-        )}
+        className="peer sr-only"
         onChange={(e) => onChange(e.target.checked)}
         type="checkbox"
       />
+      <span className="grid size-4 place-items-center rounded-sm border-2 border-ink-300 bg-ink-100 transition-colors peer-checked:border-orange peer-checked:bg-orange peer-focus-visible:ring-2 peer-focus-visible:ring-orange/40 peer-checked:[&_svg]:opacity-100">
+        <Check className="size-3 text-white opacity-0 transition-opacity" strokeWidth={3} />
+      </span>
       {labelText}
     </label>
   );

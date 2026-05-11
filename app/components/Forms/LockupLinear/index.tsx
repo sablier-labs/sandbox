@@ -1,6 +1,6 @@
 "use client";
 
-import { Send, Stamp } from "lucide-react";
+import { ChevronRight, Send, Stamp } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Console } from "@/components/ui/Console";
@@ -20,8 +20,10 @@ export function LockupLinear() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-bold text-white">Create Linear Stream (durations)</h2>
+    <div className="flex flex-col gap-5">
+      <h2 className="border-b border-ink-300 pb-3 text-lg font-bold text-white">
+        Create Linear Stream <span className="font-medium text-mist-400">(durations)</span>
+      </h2>
 
       <Field
         helperText="Sepolia DAI by default"
@@ -41,7 +43,7 @@ export function LockupLinear() {
         value={state.amount}
       />
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <Field
           helperText="seconds"
           label="Cliff duration"
@@ -56,11 +58,12 @@ export function LockupLinear() {
         />
       </div>
 
-      <details className="rounded-md border-2 border-ink-300 bg-ink p-3">
-        <summary className="cursor-pointer text-xs font-semibold tracking-wide text-mist-200 uppercase">
+      <details className="group rounded-md border-2 border-ink-300 bg-ink-100 px-4 py-3">
+        <summary className="flex cursor-pointer items-center gap-2 text-xs font-semibold tracking-wide text-mist-200 uppercase transition-colors hover:text-white">
+          <ChevronRight className="size-3 transition-transform group-open:rotate-90" />
           v4.0 advanced fields
         </summary>
-        <div className="mt-3 grid grid-cols-3 gap-3">
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
           <Field
             helperText="Token units"
             label="Unlock @ start"
@@ -89,7 +92,7 @@ export function LockupLinear() {
         />
       </details>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-4">
         <Toggle
           checked={state.cancelability}
           label="Cancelable"
@@ -102,7 +105,7 @@ export function LockupLinear() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-ink-300 pt-4">
         <Button
           intent="secondary"
           onClick={() =>

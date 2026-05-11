@@ -10,6 +10,7 @@ node_modules/
 *.log
 *.tsbuildinfo
 .DS_Store
+.eslintcache
 next-env.d.ts
 package-lock.json
 pnpm-lock.yaml

@@ -16,8 +16,10 @@ export function LockupWithdraw() {
   const log = (msg: string) => setLogs((prev) => [...prev, msg]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-bold text-white">Withdraw from Lockup</h2>
+    <div className="flex flex-col gap-5">
+      <h2 className="border-b border-ink-300 pb-3 text-lg font-bold text-white">
+        Withdraw from Lockup
+      </h2>
       <Field
         helperText="numeric stream id (uint256)"
         label="Stream id"
@@ -30,10 +32,12 @@ export function LockupWithdraw() {
         onChange={(e) => setState((p) => ({ ...p, amount: e.target.value }))}
         value={state.amount}
       />
-      <Button onClick={() => withdrawFromLockup(state, log)}>
-        <Download className="size-4" />
-        Withdraw
-      </Button>
+      <div className="flex items-center justify-end border-t border-ink-300 pt-4">
+        <Button onClick={() => withdrawFromLockup(state, log)}>
+          <Download className="size-4" />
+          Withdraw
+        </Button>
+      </div>
       <Console logs={logs} />
     </div>
   );

@@ -28,21 +28,25 @@ export function LockupHeadless() {
   const [section, setSection] = useState<SectionId>("single-durations");
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-bold text-white">Headless mode</h2>
-      <p className="text-sm text-mist-300">
-        Demonstrates calling{" "}
-        <code className="rounded-sm bg-ink-300 px-1 py-0.5 font-mono text-xs text-white">
-          SablierLockup
-        </code>{" "}
-        and{" "}
-        <code className="rounded-sm bg-ink-300 px-1 py-0.5 font-mono text-xs text-white">
-          SablierBatchLockup
-        </code>{" "}
-        directly with prefilled data.
-      </p>
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2 border-b border-ink-300 pb-3">
+        <h2 className="text-lg font-bold text-white">Headless mode</h2>
+        <p className="text-sm text-mist-300">
+          Demonstrates calling{" "}
+          <code className="rounded-sm bg-ink-200 px-1 py-0.5 font-mono text-xs text-white">
+            SablierLockup
+          </code>{" "}
+          and{" "}
+          <code className="rounded-sm bg-ink-200 px-1 py-0.5 font-mono text-xs text-white">
+            SablierBatchLockup
+          </code>{" "}
+          directly with prefilled data.
+        </p>
+      </div>
 
-      <Tabs<SectionId> active={section} onChange={setSection} options={[...sections]} />
+      <div className="-mx-1 rounded-md border-2 border-ink-300 bg-ink-100">
+        <Tabs<SectionId> active={section} onChange={setSection} options={[...sections]} />
+      </div>
 
       {section === "single-durations" ? <SingleDurations /> : null}
       {section === "single-timestamps" ? <SingleTimestamps /> : null}
@@ -56,11 +60,11 @@ function SingleDurations() {
   const log = (msg: string) => setLogs((prev) => [...prev, msg]);
   const state = LOCKUP_LINEAR_WITH_DURATIONS;
   return (
-    <div className="flex flex-col gap-3">
-      <pre className="overflow-x-auto rounded-md border-2 border-ink-300 bg-ink p-3 font-mono text-xs text-mist-200">
+    <div className="flex flex-col gap-4">
+      <pre className="max-h-64 overflow-auto rounded-md border-2 border-ink-300 bg-ink p-3 font-mono text-xs/relaxed text-mist-200">
         {JSON.stringify(state, null, 2)}
       </pre>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-ink-300 pt-4">
         <Button
           intent="secondary"
           onClick={() =>
@@ -88,11 +92,11 @@ function SingleTimestamps() {
   const [logs, setLogs] = useState<string[]>([]);
   const log = (msg: string) => setLogs((prev) => [...prev, msg]);
   return (
-    <div className="flex flex-col gap-3">
-      <pre className="overflow-x-auto rounded-md border-2 border-ink-300 bg-ink p-3 font-mono text-xs text-mist-200">
+    <div className="flex flex-col gap-4">
+      <pre className="max-h-64 overflow-auto rounded-md border-2 border-ink-300 bg-ink p-3 font-mono text-xs/relaxed text-mist-200">
         {JSON.stringify(state, null, 2)}
       </pre>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-ink-300 pt-4">
         <Button
           intent="secondary"
           onClick={() =>
@@ -120,32 +124,37 @@ function Batch() {
   const { api } = store;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <Field
         label="Token address"
         onChange={(e) => useHeadlessBatchStore.setState({ token: e.target.value })}
         value={store.token}
       />
-      {store.entries.map((entry, i) => (
-        <div
-          className="grid grid-cols-2 gap-2 rounded-md border-2 border-ink-300 bg-ink p-3"
-          key={i}
-        >
-          <Field
-            label={`Recipient #${i + 1}`}
-            onChange={(e) =>
-              api.setEntry(i, { recipient: e.target.value as typeof entry.recipient })
-            }
-            value={entry.recipient}
-          />
-          <Field
-            label="Amount"
-            onChange={(e) => api.setEntry(i, { amount: e.target.value })}
-            value={entry.amount}
-          />
-        </div>
-      ))}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2">
+        <span className="text-xs font-semibold tracking-wide text-mist-300 uppercase">
+          Recipients
+        </span>
+        {store.entries.map((entry, i) => (
+          <div
+            className="grid grid-cols-1 gap-2 rounded-md border-2 border-ink-300 bg-ink-100 p-3 md:grid-cols-2"
+            key={i}
+          >
+            <Field
+              label={`Recipient #${i + 1}`}
+              onChange={(e) =>
+                api.setEntry(i, { recipient: e.target.value as typeof entry.recipient })
+              }
+              value={entry.recipient}
+            />
+            <Field
+              label="Amount"
+              onChange={(e) => api.setEntry(i, { amount: e.target.value })}
+              value={entry.amount}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-ink-300 pt-4">
         <Button
           intent="secondary"
           onClick={() =>
