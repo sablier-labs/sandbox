@@ -1,0 +1,55 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  /* Sablier dark palette — mirrors the original styled-components theme tokens. */
+  --color-ink: #14161f;
+  --color-ink-50: #1a1d28;
+  --color-ink-100: #1e212f;
+  --color-ink-200: #242838;
+  --color-ink-300: #2a2e41;
+
+  --color-mist: #e1e4ea;
+  --color-mist-200: #c3c9d5;
+  --color-mist-300: #a5aec0;
+  --color-mist-400: #8792ab;
+  --color-mist-500: #6a7795;
+
+  --color-success: #00d395;
+  --color-danger: #e52e52;
+  --color-info: #0063ff;
+  --color-orange: #ff9c00;
+  --color-purple: #874fff;
+
+  --font-sans: var(--font-urbanist), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+    line-height: 1.2;
+  }
+
+  html,
+  body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-ink-200);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: none;
+    scroll-behavior: smooth;
+  }
+}

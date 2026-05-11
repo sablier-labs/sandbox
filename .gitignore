@@ -1,18 +1,17 @@
 # directories
-.next
-.vercel
-build
-dist
-node_modules
+.cache/
+.claude/files/
+.next/
+.vercel/
+node_modules/
 
 # files
 *.env
 *.log
 *.tsbuildinfo
 .DS_Store
-.pnp.*
 next-env.d.ts
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
-
+settings.local.json

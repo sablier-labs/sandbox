@@ -1,0 +1,7 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["@sablier/devkit/biome/base", "@sablier/devkit/biome/ui"],
+  "files": {
+    "includes": ["**/*.{css,graphql,js,jsx,json,jsonc,mjs,ts,tsx}", "!.agents/skills"]
+  }
+}
