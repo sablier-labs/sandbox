@@ -1,4 +1,4 @@
-import "./node_modules/@sablier/devkit/just/settings.just"
+import "./node_modules/@prb/devkit/just/settings.just"
 
 # ---------------------------------------------------------------------------- #
 #                                 DEPENDENCIES                                 #
